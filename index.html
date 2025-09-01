@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>FLAPPY PORK</title>
 <style>
-  :root {
-    --ui-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-  }
+  :root { --ui-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
   html,body {
     margin:0; padding:0; height:100%;
     font-family: Arial, sans-serif;
@@ -29,9 +27,10 @@
   #startScreen, #gameOver {
     position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     background: rgba(0,0,0,0.8); color:#fff; padding:24px 28px; border-radius:14px;
-    text-align:center; z-index:20; user-select:none;
+    text-align:center; z-index:20; user-select:none; max-width: 92vw;
   }
   #gameOver { display:none; } /* hide game over at load */
+
   .game-button {
     background:#4a90e2; color:#00ffff; border:none; padding:12px 22px;
     font-size:16px; font-weight:bold; font-family:'Courier New', monospace;
@@ -40,22 +39,25 @@
     letter-spacing:1px; text-transform:uppercase;
   }
   .game-button:hover { background:#357abd; }
+
+  /* Dynamic title: we’ll adjust font-size via JS; keep style consistent */
   .game-title {
-    font-size:42px; font-weight:900; margin:16px 0 6px;
+    font-weight:900; margin:16px 0 6px;
     color:#ff00ff; letter-spacing:3px; text-transform:uppercase;
     text-shadow:0 0 10px #ff00ff,0 0 20px #ff00ff,0 0 40px #ff00ff,4px 4px 0px #00ffff,8px 8px 0px #ffff00;
     background: linear-gradient(45deg,#ff00ff,#00ffff,#ffff00,#ff00ff);
     background-size:400% 400%; -webkit-background-clip:text; background-clip:text;
-    -webkit-text-fill-color:transparent; white-space:nowrap;
+    -webkit-text-fill-color:transparent; white-space:nowrap; display:inline-block;
   }
-  .game-subtitle {
+  /* Subtitles + TIP share same look per your request */
+  .game-subtitle, #hint {
     font-size:14px; font-weight:bold; font-family:'Courier New', monospace;
     color:#00ffff; text-shadow:0 0 5px #00ffff,0 0 10px #00ffff,2px 2px 0px #ff00ff;
-    margin:10px 0; letter-spacing:1px; text-transform:uppercase;
+    margin:10px 0; letter-spacing:1.2px; text-transform:uppercase;
     white-space:nowrap;
   }
-  /* Tiny, unobtrusive audio hint on mobile (taps to start unlock audio) */
-  #hint { font-size:12px; opacity:.8; margin-top:6px; }
+  /* TIP slightly smaller for visual hierarchy */
+  #hint { opacity:.95; font-size:13px; margin-top:6px; }
 </style>
 </head>
 <body>
@@ -68,11 +70,13 @@
     </div>
 
     <div id="startScreen">
-      <h1 class="game-title"><span>🫧</span> FLAPPY PORK <span class="bubble-right">🫧</span></h1>
+      <div id="titleWrap" style="max-width:90vw; overflow:hidden;">
+        <h1 class="game-title" id="gameTitle"><span>🫧</span> FLAPPY PORK <span>🫧</span></h1>
+      </div>
       <p class="game-subtitle">Navigate the pond</p>
       <p class="game-subtitle">Collect the badges, earn the points</p>
       <button class="game-button" id="startBtn">Start Game</button>
-      <div id="hint">Tip: tap/hold screen or press/hold Space to rise.</div>
+      <div id="hint">Tip: tap/hold screen or press/hold space to rise.</div>
     </div>
 
     <div id="gameOver">
@@ -92,7 +96,31 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
 }
 resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', () => { resizeCanvas(); fitStartTitle(); });
+
+/* ========= Dynamic Title Fit ========= */
+function fitStartTitle() {
+  const wrap = document.getElementById('titleWrap');
+  const title = document.getElementById('gameTitle');
+  if (!wrap || !title) return;
+
+  // Start from a reasonable max and shrink until it fits width (no wrapping)
+  const max = Math.max(28, Math.floor(window.innerWidth * 0.12)); // scale with viewport
+  const min = 16;
+  let low = min, high = max, best = min;
+
+  // Use binary search for speed
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    title.style.fontSize = mid + 'px';
+    // give the browser a tick to layout (sync measure is fine here)
+    const fits = title.scrollWidth <= wrap.clientWidth;
+    if (fits) { best = mid; low = mid + 1; } else { high = mid - 1; }
+  }
+  title.style.fontSize = best + 'px';
+}
+// Initial fit happens after DOM ready tick
+setTimeout(fitStartTitle, 0);
 
 /* ========= Game State ========= */
 let gameState = 'start'; // 'start' | 'playing' | 'gameOver'
@@ -142,63 +170,53 @@ function ensureAudio() {
     musicGain.connect(masterGain);
 
     sfxGain = actx.createGain();
-    sfxGain.gain.value = 0.9; // SFX bus (individual sounds control their own)
+    sfxGain.gain.value = 0.9; // SFX bus
     sfxGain.connect(masterGain);
   } else if (actx.state === 'suspended') {
     actx.resume();
   }
 }
 
-/* ---- Chiptune Music Loop (Public-domain-style) ----
-   Simple 8-bit vibe: square waves on two voices + a clicky noise hi-hat.
-   Pattern loops forever while playing; stopped on Game Over. */
+/* ---- Chiptune Music Loop ---- */
 function startMusic() {
   if (!actx) ensureAudio();
   if (musicRunning) return;
   musicRunning = true;
 
   const tempo = 120; // BPM
-  const beatDur = 60/tempo; // quarter note
-  const patternBeats = 16;   // 4 bars of 4/4
-  const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]; // C major
-
-  // Two simple repeating melodies
-  const leadPattern = [0,2,4,7, 7,4,2,0,  0,2,4,9, 7,4,2,0]; // scale indices
+  const beatDur = 60/tempo;
+  const patternBeats = 16; // 4 bars
+  const scale = [261.63,293.66,329.63,349.23,392.00,440.00,493.88,523.25]; // C major
+  const leadPattern = [0,2,4,7, 7,4,2,0,  0,2,4,9, 7,4,2,0];
   const bassPattern = [0,0,0,0, 5,5,5,5,  3,3,3,3, 4,4,4,4];
 
-  // Schedules one loop chunk
   function scheduleLoop(startTime) {
     for (let i=0; i<patternBeats; i++) {
-      const t = startTime + i * beatDur;
+      const t = startTime + i*beatDur;
 
-      // Lead (square)
+      // Lead
       const oscL = actx.createOscillator();
       const gainL = actx.createGain();
       oscL.type = 'square';
-      const fL = scale[leadPattern[i] % scale.length];
-      oscL.frequency.value = fL;
-      // short envelope
+      oscL.frequency.value = scale[leadPattern[i] % scale.length];
       gainL.gain.setValueAtTime(0.0, t);
       gainL.gain.linearRampToValueAtTime(0.18, t + 0.01);
-      gainL.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.9);
+      gainL.gain.exponentialRampToValueAtTime(0.001, t + beatDur*0.9);
       oscL.connect(gainL).connect(musicGain);
-      oscL.start(t);
-      oscL.stop(t + beatDur);
+      oscL.start(t); oscL.stop(t + beatDur);
 
-      // Bass (square one octave down)
+      // Bass
       const oscB = actx.createOscillator();
       const gainB = actx.createGain();
       oscB.type = 'square';
-      const fB = scale[bassPattern[i] % scale.length] / 2;
-      oscB.frequency.value = fB;
+      oscB.frequency.value = scale[bassPattern[i] % scale.length] / 2;
       gainB.gain.setValueAtTime(0.0, t);
       gainB.gain.linearRampToValueAtTime(0.12, t + 0.01);
-      gainB.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.95);
+      gainB.gain.exponentialRampToValueAtTime(0.001, t + beatDur*0.95);
       oscB.connect(gainB).connect(musicGain);
-      oscB.start(t);
-      oscB.stop(t + beatDur);
+      oscB.start(t); oscB.stop(t + beatDur);
 
-      // Simple hi-hat (filtered noise burst) on eighths
+      // Hi-hat (eighths)
       for (let k=0; k<2; k++) {
         const ht = t + k*(beatDur/2);
         const bufferSize = 256;
@@ -209,8 +227,7 @@ function startMusic() {
         src.buffer = noiseBuf;
 
         const hp = actx.createBiquadFilter();
-        hp.type = 'highpass';
-        hp.frequency.value = 4000;
+        hp.type = 'highpass'; hp.frequency.value = 4000;
 
         const g = actx.createGain();
         g.gain.setValueAtTime(0.0, ht);
@@ -218,23 +235,18 @@ function startMusic() {
         g.gain.exponentialRampToValueAtTime(0.0005, ht + 0.1);
 
         src.connect(hp).connect(g).connect(musicGain);
-        src.start(ht);
-        src.stop(ht + 0.12);
+        src.start(ht); src.stop(ht + 0.12);
       }
     }
   }
 
-  // Kick off and keep looping
   const startAt = actx.currentTime + 0.05;
   scheduleLoop(startAt);
-  // reschedule every pattern length slightly ahead of time
   const loopDur = patternBeats * beatDur;
   musicSchedulerId = setInterval(() => {
-    const t = actx.currentTime + 0.05;
-    scheduleLoop(t);
+    scheduleLoop(actx.currentTime + 0.05);
   }, loopDur * 1000 - 50);
 }
-
 function stopMusic() {
   if (musicSchedulerId) clearInterval(musicSchedulerId);
   musicSchedulerId = null;
@@ -251,13 +263,11 @@ function playBubblePop() {
   o.frequency.setValueAtTime(900, t);
   o.frequency.exponentialRampToValueAtTime(1600, t + 0.06);
   g.gain.setValueAtTime(0.001, t);
-  g.gain.exponentialRampToValueAtTime(0.55, t + 0.01); // louder pop
+  g.gain.exponentialRampToValueAtTime(0.65, t + 0.01); // louder pop
   g.gain.exponentialRampToValueAtTime(0.0008, t + 0.14);
   o.connect(g).connect(sfxGain);
-  o.start(t);
-  o.stop(t + 0.16);
+  o.start(t); o.stop(t + 0.16);
 }
-
 function playThunk() {
   if (!actx) ensureAudio();
   const t = actx.currentTime;
@@ -267,14 +277,48 @@ function playThunk() {
   o.frequency.setValueAtTime(180, t);
   o.frequency.exponentialRampToValueAtTime(90, t + 0.12);
   g.gain.setValueAtTime(0.001, t);
-  g.gain.exponentialRampToValueAtTime(0.7, t + 0.02); // louder thunk
+  g.gain.exponentialRampToValueAtTime(0.75, t + 0.02); // louder thunk
   g.gain.exponentialRampToValueAtTime(0.0008, t + 0.22);
   o.connect(g).connect(sfxGain);
-  o.start(t);
-  o.stop(t + 0.25);
+  o.start(t); o.stop(t + 0.25);
 }
 
 /* ========= Pipes & Badges ========= */
+/* Precompute crack geometry RELATIVE to pipe (0,0), then offset during draw */
+function makeCracksRel(w, h) {
+  const cracks = [];
+  const vCount = 3, hCount = 3;
+  // vertical cracks
+  for (let i=0; i<vCount; i++) {
+    const baseX = 10 + (i * (w - 20) / (vCount-1));
+    let curY = 0;
+    const segs = [];
+    while (curY < h) {
+      const step = 12 + Math.random()*18;
+      const nextY = Math.min(curY + step, h);
+      const offX = baseX + (Math.random()-0.5)*8;
+      segs.push({x:offX, y:nextY});
+      curY = nextY;
+    }
+    cracks.push({type:'v', start:{x:baseX, y:0}, points:segs});
+  }
+  // horizontal cracks
+  for (let i=0; i<hCount; i++) {
+    const baseY = 15 + (i * (h - 30) / (hCount));
+    const segs = [];
+    let curX = 0, endX = w;
+    while (curX < endX) {
+      const step = 10 + Math.random()*14;
+      const nx = Math.min(curX + step, endX);
+      const oy = baseY + (Math.random()-0.5)*6;
+      segs.push({x:nx, y:oy});
+      curX = nx;
+    }
+    cracks.push({type:'h', start:{x:0, y:baseY}, points:segs});
+  }
+  return cracks;
+}
+
 function createPipe() {
   const gap = 200;
   const pipeWidth = 50;
@@ -282,53 +326,18 @@ function createPipe() {
   const maxHeight = canvas.height - gap - minHeight;
   const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
 
-  // Precompute crack segments for perf
-  function makeCracks(x, y, w, h) {
-    const cracks = [];
-    const vCount = 3, hCount = 3;
-    // vertical cracks
-    for (let i=0; i<vCount; i++) {
-      const baseX = x + 10 + (i * (w - 20) / (vCount-1));
-      let curY = y;
-      const segs = [];
-      while (curY < y + h) {
-        const step = 12 + Math.random()*18;
-        const nextY = Math.min(curY + step, y + h);
-        const offX = baseX + (Math.random()-0.5)*8;
-        segs.push({x:offX, y:nextY});
-        curY = nextY;
-      }
-      cracks.push({type:'v', start:{x:baseX, y:y}, points:segs});
-    }
-    // horizontal cracks
-    for (let i=0; i<hCount; i++) {
-      const baseY = y + 15 + (i * (h - 30) / (hCount));
-      const segs = [];
-      let curX = x, endX = x + w;
-      while (curX < endX) {
-        const step = 10 + Math.random()*14;
-        const nx = Math.min(curX + step, endX);
-        const oy = baseY + (Math.random()-0.5)*6;
-        segs.push({x:nx, y:oy});
-        curX = nx;
-      }
-      cracks.push({type:'h', start:{x:x, y:baseY}, points:segs});
-    }
-    return cracks;
-  }
-
   const pipe = {
     x: canvas.width,
     width: pipeWidth,
     topHeight,
     bottomY: topHeight + gap,
     bottomHeight: canvas.height - (topHeight + gap),
-    passed: false,
+    passed: false
   };
 
-  // store cracks for both top and bottom
-  pipe.topCracks = makeCracks(pipe.x, 0, pipeWidth, topHeight);
-  pipe.bottomCracks = makeCracks(pipe.x, pipe.bottomY, pipeWidth, pipe.bottomHeight);
+  // store relative cracks for top and bottom sections
+  pipe.topCracks = makeCracksRel(pipeWidth, topHeight);
+  pipe.bottomCracks = makeCracksRel(pipeWidth, pipe.bottomHeight);
 
   pipes.push(pipe);
 }
@@ -361,7 +370,7 @@ function createParticle(x,y) {
 
 /* ========= Drawing ========= */
 function drawBackground() {
-  // soft animated water lines (lightweight)
+  // animated water lines (lightweight)
   ctx.fillStyle = '#4682b4';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   const grad = ctx.createLinearGradient(0,0,0,canvas.height);
@@ -393,7 +402,7 @@ function drawPlayer() {
   const rotation = Math.max(-0.5, Math.min(0.5, player.velocity*0.03));
   ctx.rotate(rotation);
 
-  // Draw clean bubble first (no stray seam)
+  // Bubble (clean circle—no seam)
   ctx.beginPath();
   ctx.lineWidth = 2;
   ctx.strokeStyle = 'rgba(255,255,255,0.6)';
@@ -405,12 +414,12 @@ function drawPlayer() {
   ctx.font = `${player.width}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('🐽', 0, 1); // tiny 1px y tweak to visually center
+  ctx.fillText('🐽', 0, 1); // slight y-tweak to center visually
 
   ctx.restore();
 }
 
-function drawTunnel(x,y,width,height,isTop, cracks) {
+function drawTunnel(x,y,width,height,isTop, cracksRel) {
   // solid color body for perf
   ctx.fillStyle = isTop ? '#3e6b1f' : '#7d2323';
   ctx.fillRect(x,y,width,height);
@@ -420,14 +429,14 @@ function drawTunnel(x,y,width,height,isTop, cracks) {
   ctx.lineWidth = 3;
   ctx.strokeRect(x,y,width,height);
 
-  // draw cracks (precomputed) – thin strokes
+  // draw cracks (relative to pipe origin)
   ctx.strokeStyle = isTop ? '#1a3009' : '#3d0e0e';
   ctx.lineWidth = 1;
   ctx.lineCap = 'round';
-  cracks.forEach(ck=>{
+  cracksRel.forEach(ck=>{
     ctx.beginPath();
-    ctx.moveTo(ck.start.x, ck.start.y);
-    ck.points.forEach(p=>ctx.lineTo(p.x, p.y));
+    ctx.moveTo(x + ck.start.x, y + ck.start.y);
+    ck.points.forEach(p=>ctx.lineTo(x + p.x, y + p.y));
     ctx.stroke();
   });
 }
@@ -490,19 +499,15 @@ function updateGame() {
   }
   player.y += player.velocity;
 
-  // pipes spawn / move (side-scrolling stays; only crack animation removed)
+  // pipes spawn / move
   if (frame % 140 === 0) createPipe();
 
   // badges
   if (frame % 90 === 0) createBadge();
 
   // move world left
-  pipes.forEach(pipe=>{
-    pipe.x -= 3 * gameSpeed;
-  });
-  badges.forEach(b=>{
-    b.x -= 2 * gameSpeed;
-  });
+  pipes.forEach(pipe=>{ pipe.x -= 3 * gameSpeed; });
+  badges.forEach(b=>{ b.x -= 2 * gameSpeed; });
   particles.forEach(p=>{
     p.x += p.vx * gameSpeed;
     p.y += p.vy;
@@ -514,7 +519,7 @@ function updateGame() {
   badges = badges.filter(b=>!b.collected && b.x + b.width > 0);
   particles = particles.filter(p=>p.life>0);
 
-  // scoring and collisions
+  // scoring
   pipes.forEach(pipe=>{
     if (!pipe.passed && pipe.x + pipe.width < player.x) {
       pipe.passed = true;
@@ -545,7 +550,7 @@ function updateGame() {
     return;
   }
 
-  // pipes
+  // pipes collision
   for (const pipe of pipes) {
     const hitX = (player.x < pipe.x + pipe.width) && (player.x + player.width > pipe.x);
     const hitY = (player.y < pipe.topHeight) || (player.y + player.height > pipe.bottomY);
@@ -604,10 +609,7 @@ document.addEventListener('keydown', e=>{
     e.preventDefault();
     if (gameState==='playing') isSpacePressed = true;
   }
-  // Allow quick-start with Enter on start screen
-  if (e.code==='Enter' && gameState==='start') {
-    startGame();
-  }
+  if (e.code==='Enter' && gameState==='start') startGame();
 });
 document.addEventListener('keyup', e=>{
   if (e.code==='Space') {
@@ -615,27 +617,25 @@ document.addEventListener('keyup', e=>{
     isSpacePressed = false;
   }
 });
-canvas.addEventListener('mousedown', ()=>{
-  if (gameState==='playing') isMousePressed = true;
-});
+canvas.addEventListener('mousedown', ()=>{ if (gameState==='playing') isMousePressed = true; });
 canvas.addEventListener('mouseup', ()=>{ isMousePressed = false; });
 canvas.addEventListener('mouseleave', ()=>{ isMousePressed = false; });
 // Touch
 canvas.addEventListener('touchstart', (e)=>{
   e.preventDefault();
   if (gameState==='playing') isMousePressed = true;
-});
+}, {passive:false});
 canvas.addEventListener('touchend', (e)=>{
   e.preventDefault();
   isMousePressed = false;
-});
+}, {passive:false});
 
 /* ========= Buttons ========= */
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('restartBtn').addEventListener('click', restartGame);
 
 /* ========= Kickoff ========= */
-draw(); // render loop runs the whole time; UI controls visibility
+draw(); // render loop runs; UI controls visibility
 </script>
 </body>
 </html>
