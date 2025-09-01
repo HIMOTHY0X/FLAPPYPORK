@@ -31,7 +31,6 @@
     z-index:10; display:none; user-select:none;
   }
   
-  /* Responsive UI positioning */
   @media (max-width: 768px) {
     #gameUI {
       font-size:16px;
@@ -58,19 +57,11 @@
     box-sizing: border-box;
   }
   
-  /* Mobile adjustments for game screens */
   @media (max-width: 768px) {
     #startScreen, #gameOver {
       padding:15px;
       border-radius:10px;
       max-width:95vw;
-    }
-  }
-  
-  @media (max-height: 600px) {
-    #startScreen, #gameOver {
-      padding:10px;
-      max-height:95vh;
     }
   }
   
@@ -82,13 +73,12 @@
     border-radius:8px; cursor:pointer; margin:10px; transition:background .2s ease;
     text-shadow:0 0 5px #00ffff,0 0 10px #00ffff,2px 2px 0px #ff00ff;
     letter-spacing:1px; text-transform:uppercase;
-    min-height:44px; /* Better touch target */
+    min-height:44px;
     display:inline-block;
   }
   .game-button:hover { background:#357abd; }
   .game-button:active { transform: scale(0.95); }
   
-  /* Mobile button adjustments */
   @media (max-width: 768px) {
     .game-button {
       font-size:14px;
@@ -105,17 +95,22 @@
     background-size:400% 400%; -webkit-background-clip:text; background-clip:text;
     -webkit-text-fill-color:transparent; 
     line-height: 1.1;
-    word-break: keep-all;
-    white-space: nowrap;
   }
   
-  .bubble-left {
-    display: inline-block;
-    transform: scaleX(-1);
+  @media (max-width: 768px) {
+    .game-title {
+      font-size:26px;
+      letter-spacing:1px;
+      margin:12px 0 6px;
+    }
   }
   
-  .bubble-right {
-    display: inline-block;
+  @media (max-width: 480px) {
+    .game-title {
+      font-size:22px;
+      letter-spacing:0.5px;
+      margin:8px 0 4px;
+    }
   }
   
   .high-score-display {
@@ -137,10 +132,6 @@
   
   .score-comparison {
     margin: 15px 0;
-  }
-  
-  .current-score {
-    margin-bottom: 10px;
   }
   
   .high-score-section {
@@ -168,93 +159,6 @@
     to { transform: scale(1.05); }
   }
   
-  /* Responsive title sizing */
-  @media (max-width: 768px) {
-    .game-title {
-      font-size:26px;
-      letter-spacing:1px;
-      margin:12px 0 6px;
-    }
-  }
-  
-  /* Mobile adjustments for high score display */
-  @media (max-width: 768px) {
-    .high-score-display {
-      margin: 12px auto 16px auto;
-      padding: 10px 14px;
-      max-width: 180px;
-    }
-    
-    .high-score-header {
-      font-size: 11px;
-      margin-bottom: 6px;
-    }
-    
-    .high-score-item {
-      font-size: 14px;
-      gap: 3px;
-    }
-    
-    .high-score-stats {
-      gap: 6px;
-    }
-    
-    .high-score-section {
-      padding: 6px 10px;
-    }
-    
-    .high-score-label {
-      font-size: 11px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .high-score-display {
-      margin: 10px auto 14px auto;
-      padding: 8px 12px;
-      max-width: 160px;
-    }
-    
-    .high-score-header {
-      font-size: 10px;
-      margin-bottom: 5px;
-    }
-    
-    .high-score-item {
-      font-size: 13px;
-      gap: 2px;
-    }
-    
-    .high-score-stats {
-      gap: 5px;
-    }
-    
-    .high-score-divider {
-      font-size: 14px;
-    }
-  }
-    .game-title {
-      font-size:22px;
-      letter-spacing:0.5px;
-      margin:8px 0 4px;
-    }
-  }
-  
-  @media (max-width: 360px) {
-    .game-title {
-      font-size:18px;
-      letter-spacing:0px;
-      margin:6px 0 3px;
-    }
-  }
-  
-  @media (max-height: 600px) {
-    .game-title {
-      font-size:28px;
-      margin:8px 0 4px;
-    }
-  }
-  
   .game-subtitle {
     font-size:14px; font-weight:bold; font-family:'Courier New', monospace;
     color:#00ffff; text-shadow:0 0 5px #00ffff,0 0 10px #00ffff,2px 2px 0px #ff00ff;
@@ -262,19 +166,11 @@
     line-height: 1.3;
   }
   
-  /* Mobile subtitle adjustments */
   @media (max-width: 768px) {
     .game-subtitle {
       font-size:12px;
       margin:6px 0;
       letter-spacing:0.5px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .game-subtitle {
-      font-size:11px;
-      margin:4px 0;
     }
   }
   
@@ -291,12 +187,6 @@
       margin-top:4px;
     }
   }
-  
-  @media (max-width: 480px) {
-    #hint {
-      font-size:10px;
-    }
-  }
 </style>
 </head>
 <body>
@@ -309,7 +199,7 @@
     </div>
 
     <div id="startScreen">
-      <h1 class="game-title"><span class="bubble-left">🫧</span> FLAPPY PORK <span class="bubble-right">🫧</span></h1>
+      <h1 class="game-title">🫧 FLAPPY PORK 🫧</h1>
       <div class="high-score-display">
         <div class="high-score-item">🏆 High Score: <span id="highScore">0</span></div>
         <div class="high-score-item">🎖️ Best Badges: <span id="highBadges">0</span></div>
@@ -332,42 +222,28 @@
           <p class="game-subtitle">🏆 <span id="finalHighScore">0</span> | 🎖️ <span id="finalHighBadges">0</span></p>
         </div>
       </div>
-      <button class="game-button" id="restartBtn">Flap Anyways</button>
+      <button class="game-button" id="restartBtn">Flap Again</button>
+      <button class="game-button" id="homeBtn" style="font-size:12px; padding:8px 16px; margin:5px;">HOME</button>
     </div>
   </div>
 
 <script>
-/* ========= Canvas Setup ========= */
+// Canvas Setup
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d', { alpha: false }); // better perf
+const ctx = canvas.getContext('2d');
 
 function resizeCanvas() {
-  // Use device pixel ratio for crisp rendering on high-DPI displays
-  const dpr = window.devicePixelRatio || 1;
-  const displayWidth = window.innerWidth;
-  const displayHeight = window.innerHeight;
-  
-  canvas.width = displayWidth * dpr;
-  canvas.height = displayHeight * dpr;
-  canvas.style.width = displayWidth + 'px';
-  canvas.style.height = displayHeight + 'px';
-  
-  // Scale the context to match device pixel ratio
-  ctx.scale(dpr, dpr);
-  
-  // Store actual display dimensions for game logic
-  canvas.displayWidth = displayWidth;
-  canvas.displayHeight = displayHeight;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.displayWidth = window.innerWidth;
+  canvas.displayHeight = window.innerHeight;
 }
 
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('orientationchange', () => {
-  setTimeout(resizeCanvas, 100); // Small delay for orientation change
-});
 
-/* ========= Game State ========= */
-let gameState = 'start'; // 'start' | 'playing' | 'gameOver'
+// Game State
+let gameState = 'start';
 let score = 0;
 let badgeCount = 0;
 let frame = 0;
@@ -377,30 +253,19 @@ let gameSpeed = 1;
 let highScore = 0;
 let highBadges = 0;
 
-// High Score Management (In-memory for Claude artifacts)
-// Note: Replace with localStorage in your own environment
+// In-memory storage
 let gameData = {
   highScore: 0,
   highBadges: 0
 };
 
 function loadHighScore() {
-  // In your own environment, replace this with:
-  // const saved = localStorage.getItem('flappyPorkHighScore');
-  // if (saved) {
-  //   gameData = JSON.parse(saved);
-  // }
-  
   highScore = gameData.highScore;
   highBadges = gameData.highBadges;
   updateHighScoreDisplay();
 }
 
 function saveHighScore() {
-  // In your own environment, replace this with:
-  // localStorage.setItem('flappyPorkHighScore', JSON.stringify(gameData));
-  
-  // For now, just update the in-memory data
   gameData.highScore = highScore;
   gameData.highBadges = highBadges;
 }
@@ -412,6 +277,7 @@ function updateHighScoreDisplay() {
   document.getElementById('finalHighBadges').textContent = highBadges;
 }
 
+// Player
 const player = {
   x: 100,
   y: 300,
@@ -423,206 +289,251 @@ const player = {
   maxUpVelocity: -8,
   maxDownVelocity: 8
 };
+
 let pipes = [];
 let badges = [];
 let particles = [];
 
 const badgeTypes = ['⛏️','🤝','🐷','💎','👨‍🍳','🐰','😭','🥽','🥼','✊','✨'];
 
-/* ========= Audio (Procedural, No Assets Needed) ========= */
-let AudioCtx = window.AudioContext || window.webkitAudioContext;
-let actx = null;
+// Enhanced 8-bit Audio System
+let audioContext = null;
 let masterGain = null;
 let musicGain = null;
 let sfxGain = null;
 let musicRunning = false;
 let musicSchedulerId = null;
 
-// Create or resume audio on first user gesture
-function ensureAudio() {
-  if (!actx) {
-    actx = new AudioCtx();
-    masterGain = actx.createGain();
-    masterGain.gain.value = 0.9; // overall headroom
-    masterGain.connect(actx.destination);
+function initAudio() {
+  try {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Create audio routing
+      masterGain = audioContext.createGain();
+      masterGain.gain.value = 0.7;
+      masterGain.connect(audioContext.destination);
 
-    musicGain = actx.createGain();
-    musicGain.gain.value = 0.08; // subtle background volume
-    musicGain.connect(masterGain);
+      musicGain = audioContext.createGain();
+      musicGain.gain.value = 0.08; // Subtle background music
+      musicGain.connect(masterGain);
 
-    sfxGain = actx.createGain();
-    sfxGain.gain.value = 0.9; // SFX bus (individual sounds control their own)
-    sfxGain.connect(masterGain);
-  } else if (actx.state === 'suspended') {
-    actx.resume();
+      sfxGain = audioContext.createGain();
+      sfxGain.gain.value = 0.4; // Sound effects volume
+      sfxGain.connect(masterGain);
+    }
+    
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  } catch (e) {
+    console.log('Audio not available');
   }
 }
 
-/* ---- Chiptune Music Loop (Public-domain-style) ----
-   Simple 8-bit vibe: square waves on two voices + a clicky noise hi-hat.
-   Pattern loops forever while playing; stopped on Game Over. */
+// 8-bit Music System
 function startMusic() {
-  if (!actx) ensureAudio();
-  if (musicRunning) return;
-  musicRunning = true;
-
-  const tempo = 120; // BPM
-  const beatDur = 60/tempo; // quarter note
-  const patternBeats = 16;   // 4 bars of 4/4
-  const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]; // C major
-
-  // Two simple repeating melodies
-  const leadPattern = [0,2,4,7, 7,4,2,0,  0,2,4,9, 7,4,2,0]; // scale indices
-  const bassPattern = [0,0,0,0, 5,5,5,5,  3,3,3,3, 4,4,4,4];
-
-  // Schedules one loop chunk
-  function scheduleLoop(startTime) {
-    for (let i=0; i<patternBeats; i++) {
-      const t = startTime + i * beatDur;
-
-      // Lead (square)
-      const oscL = actx.createOscillator();
-      const gainL = actx.createGain();
-      oscL.type = 'square';
-      const fL = scale[leadPattern[i] % scale.length];
-      oscL.frequency.value = fL;
-      // short envelope
-      gainL.gain.setValueAtTime(0.0, t);
-      gainL.gain.linearRampToValueAtTime(0.18, t + 0.01);
-      gainL.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.9);
-      oscL.connect(gainL).connect(musicGain);
-      oscL.start(t);
-      oscL.stop(t + beatDur);
-
-      // Bass (square one octave down)
-      const oscB = actx.createOscillator();
-      const gainB = actx.createGain();
-      oscB.type = 'square';
-      const fB = scale[bassPattern[i] % scale.length] / 2;
-      oscB.frequency.value = fB;
-      gainB.gain.setValueAtTime(0.0, t);
-      gainB.gain.linearRampToValueAtTime(0.12, t + 0.01);
-      gainB.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.95);
-      oscB.connect(gainB).connect(musicGain);
-      oscB.start(t);
-      oscB.stop(t + beatDur);
-
-      // Simple hi-hat (filtered noise burst) on eighths
-      for (let k=0; k<2; k++) {
-        const ht = t + k*(beatDur/2);
-        const bufferSize = 256;
-        const noiseBuf = actx.createBuffer(1, bufferSize, actx.sampleRate);
-        const data = noiseBuf.getChannelData(0);
-        for (let n=0; n<bufferSize; n++) data[n] = (Math.random()*2-1) * 0.8;
-        const src = actx.createBufferSource();
-        src.buffer = noiseBuf;
-
-        const hp = actx.createBiquadFilter();
-        hp.type = 'highpass';
-        hp.frequency.value = 4000;
-
-        const g = actx.createGain();
-        g.gain.setValueAtTime(0.0, ht);
-        g.gain.linearRampToValueAtTime(0.08, ht + 0.005);
-        g.gain.exponentialRampToValueAtTime(0.0005, ht + 0.1);
-
-        src.connect(hp).connect(g).connect(musicGain);
-        src.start(ht);
-        src.stop(ht + 0.12);
+  if (!audioContext || musicRunning) return;
+  
+  try {
+    musicRunning = true;
+    
+    const tempo = 120; // BPM
+    const beatDuration = 60 / tempo; // Quarter note duration
+    const patternLength = 16; // 4 bars of 4/4 time
+    
+    // C Major scale frequencies
+    const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+    
+    // Simple melodies
+    const leadMelody = [0,2,4,7, 7,4,2,0, 0,2,4,7, 7,4,2,0];
+    const bassMelody = [0,0,0,0, 5,5,5,5, 3,3,3,3, 4,4,4,4];
+    
+    function schedulePattern(startTime) {
+      for (let i = 0; i < patternLength; i++) {
+        const noteTime = startTime + i * beatDuration;
+        
+        // Lead melody (square wave)
+        const leadOsc = audioContext.createOscillator();
+        const leadGain = audioContext.createGain();
+        leadOsc.type = 'square';
+        leadOsc.frequency.value = scale[leadMelody[i] % scale.length];
+        
+        // Envelope
+        leadGain.gain.setValueAtTime(0, noteTime);
+        leadGain.gain.linearRampToValueAtTime(0.15, noteTime + 0.01);
+        leadGain.gain.exponentialRampToValueAtTime(0.001, noteTime + beatDuration * 0.9);
+        
+        leadOsc.connect(leadGain).connect(musicGain);
+        leadOsc.start(noteTime);
+        leadOsc.stop(noteTime + beatDuration);
+        
+        // Bass line (square wave, lower octave)
+        const bassOsc = audioContext.createOscillator();
+        const bassGain = audioContext.createGain();
+        bassOsc.type = 'square';
+        bassOsc.frequency.value = scale[bassMelody[i] % scale.length] / 2;
+        
+        bassGain.gain.setValueAtTime(0, noteTime);
+        bassGain.gain.linearRampToValueAtTime(0.1, noteTime + 0.01);
+        bassGain.gain.exponentialRampToValueAtTime(0.001, noteTime + beatDuration * 0.95);
+        
+        bassOsc.connect(bassGain).connect(musicGain);
+        bassOsc.start(noteTime);
+        bassOsc.stop(noteTime + beatDuration);
+        
+        // Hi-hat (noise burst on eighth notes)
+        for (let j = 0; j < 2; j++) {
+          const hihatTime = noteTime + j * (beatDuration / 2);
+          
+          // Create noise buffer
+          const bufferSize = 256;
+          const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+          const data = noiseBuffer.getChannelData(0);
+          
+          for (let k = 0; k < bufferSize; k++) {
+            data[k] = (Math.random() * 2 - 1) * 0.8;
+          }
+          
+          const noiseSource = audioContext.createBufferSource();
+          noiseSource.buffer = noiseBuffer;
+          
+          const hipassFilter = audioContext.createBiquadFilter();
+          hipassFilter.type = 'highpass';
+          hipassFilter.frequency.value = 4000;
+          
+          const hihatGain = audioContext.createGain();
+          hihatGain.gain.setValueAtTime(0, hihatTime);
+          hihatGain.gain.linearRampToValueAtTime(0.06, hihatTime + 0.005);
+          hihatGain.gain.exponentialRampToValueAtTime(0.0005, hihatTime + 0.1);
+          
+          noiseSource.connect(hipassFilter).connect(hihatGain).connect(musicGain);
+          noiseSource.start(hihatTime);
+          noiseSource.stop(hihatTime + 0.12);
+        }
       }
     }
+    
+    // Start the pattern
+    const startTime = audioContext.currentTime + 0.05;
+    schedulePattern(startTime);
+    
+    // Schedule recurring patterns
+    const patternDuration = patternLength * beatDuration;
+    musicSchedulerId = setInterval(() => {
+      if (musicRunning && audioContext) {
+        schedulePattern(audioContext.currentTime + 0.05);
+      }
+    }, patternDuration * 1000 - 50);
+    
+  } catch (e) {
+    console.log('Music error:', e);
+    musicRunning = false;
   }
-
-  // Kick off and keep looping
-  const startAt = actx.currentTime + 0.05;
-  scheduleLoop(startAt);
-  // reschedule every pattern length slightly ahead of time
-  const loopDur = patternBeats * beatDur;
-  musicSchedulerId = setInterval(() => {
-    const t = actx.currentTime + 0.05;
-    scheduleLoop(t);
-  }, loopDur * 1000 - 50);
 }
 
 function stopMusic() {
-  if (musicSchedulerId) clearInterval(musicSchedulerId);
-  musicSchedulerId = null;
   musicRunning = false;
+  if (musicSchedulerId) {
+    clearInterval(musicSchedulerId);
+    musicSchedulerId = null;
+  }
 }
 
-/* ---- SFX ---- */
+// Enhanced Sound Effects
 function playBubblePop() {
-  if (!actx) ensureAudio();
-  const t = actx.currentTime;
-  const o = actx.createOscillator();
-  const g = actx.createGain();
-  o.type = 'square';
-  o.frequency.setValueAtTime(900, t);
-  o.frequency.exponentialRampToValueAtTime(1600, t + 0.06);
-  g.gain.setValueAtTime(0.001, t);
-  g.gain.exponentialRampToValueAtTime(0.55, t + 0.01); // louder pop
-  g.gain.exponentialRampToValueAtTime(0.0008, t + 0.14);
-  o.connect(g).connect(sfxGain);
-  o.start(t);
-  o.stop(t + 0.16);
+  if (!audioContext) return;
+  try {
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const currentTime = audioContext.currentTime;
+    
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(900, currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1600, currentTime + 0.06);
+    
+    gain.gain.setValueAtTime(0.001, currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.4, currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0008, currentTime + 0.14);
+    
+    osc.connect(gain).connect(sfxGain);
+    osc.start(currentTime);
+    osc.stop(currentTime + 0.16);
+  } catch (e) {
+    console.log('Sound effect error');
+  }
 }
 
 function playThunk() {
-  if (!actx) ensureAudio();
-  const t = actx.currentTime;
-  const o = actx.createOscillator();
-  const g = actx.createGain();
-  o.type = 'triangle';
-  o.frequency.setValueAtTime(180, t);
-  o.frequency.exponentialRampToValueAtTime(90, t + 0.12);
-  g.gain.setValueAtTime(0.001, t);
-  g.gain.exponentialRampToValueAtTime(0.7, t + 0.02); // louder thunk
-  g.gain.exponentialRampToValueAtTime(0.0008, t + 0.22);
-  o.connect(g).connect(sfxGain);
-  o.start(t);
-  o.stop(t + 0.25);
+  if (!audioContext) return;
+  try {
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const currentTime = audioContext.currentTime;
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180, currentTime);
+    osc.frequency.exponentialRampToValueAtTime(90, currentTime + 0.12);
+    
+    gain.gain.setValueAtTime(0.001, currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.5, currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0008, currentTime + 0.22);
+    
+    osc.connect(gain).connect(sfxGain);
+    osc.start(currentTime);
+    osc.stop(currentTime + 0.25);
+  } catch (e) {
+    console.log('Sound effect error');
+  }
 }
 
-/* ========= Pipes & Badges ========= */
+// Game Objects
 function createPipe() {
-  const gap = 200;
+  const gap = Math.max(180, canvas.displayHeight * 0.3);
   const pipeWidth = 50;
   const minHeight = 50;
   const maxHeight = canvas.displayHeight - gap - minHeight;
   const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
 
-  // Precompute crack segments for perf
-  function makeCracks(x, y, w, h) {
+  // Precompute crack segments for visual detail
+  function generateCracks(x, y, w, h) {
     const cracks = [];
-    const vCount = 3, hCount = 3;
-    // vertical cracks
-    for (let i=0; i<vCount; i++) {
-      const baseX = x + 10 + (i * (w - 20) / (vCount-1));
-      let curY = y;
-      const segs = [];
-      while (curY < y + h) {
-        const step = 12 + Math.random()*18;
-        const nextY = Math.min(curY + step, y + h);
-        const offX = baseX + (Math.random()-0.5)*8;
-        segs.push({x:offX, y:nextY});
-        curY = nextY;
+    const verticalCount = 3;
+    const horizontalCount = 3;
+    
+    // Vertical cracks
+    for (let i = 0; i < verticalCount; i++) {
+      const baseX = x + 10 + (i * (w - 20) / (verticalCount - 1));
+      let currentY = y;
+      const segments = [];
+      
+      while (currentY < y + h) {
+        const step = 12 + Math.random() * 18;
+        const nextY = Math.min(currentY + step, y + h);
+        const offsetX = baseX + (Math.random() - 0.5) * 8;
+        segments.push({x: offsetX, y: nextY});
+        currentY = nextY;
       }
-      cracks.push({type:'v', start:{x:baseX, y:y}, points:segs});
+      cracks.push({type: 'vertical', start: {x: baseX, y: y}, points: segments});
     }
-    // horizontal cracks
-    for (let i=0; i<hCount; i++) {
-      const baseY = y + 15 + (i * (h - 30) / (hCount));
-      const segs = [];
-      let curX = x, endX = x + w;
-      while (curX < endX) {
-        const step = 10 + Math.random()*14;
-        const nx = Math.min(curX + step, endX);
-        const oy = baseY + (Math.random()-0.5)*6;
-        segs.push({x:nx, y:oy});
-        curX = nx;
+    
+    // Horizontal cracks
+    for (let i = 0; i < horizontalCount; i++) {
+      const baseY = y + 15 + (i * (h - 30) / horizontalCount);
+      const segments = [];
+      let currentX = x;
+      const endX = x + w;
+      
+      while (currentX < endX) {
+        const step = 10 + Math.random() * 14;
+        const nextX = Math.min(currentX + step, endX);
+        const offsetY = baseY + (Math.random() - 0.5) * 6;
+        segments.push({x: nextX, y: offsetY});
+        currentX = nextX;
       }
-      cracks.push({type:'h', start:{x:x, y:baseY}, points:segs});
+      cracks.push({type: 'horizontal', start: {x: x, y: baseY}, points: segments});
     }
+    
     return cracks;
   }
 
@@ -633,32 +544,23 @@ function createPipe() {
     bottomY: topHeight + gap,
     bottomHeight: canvas.displayHeight - (topHeight + gap),
     passed: false,
+    topCracks: generateCracks(canvas.displayWidth, 0, pipeWidth, topHeight),
+    bottomCracks: generateCracks(canvas.displayWidth, topHeight + gap, pipeWidth, canvas.displayHeight - (topHeight + gap))
   };
 
-  // store cracks for both top and bottom
-  pipe.topCracks = makeCracks(pipe.x, 0, pipeWidth, topHeight);
-  pipe.bottomCracks = makeCracks(pipe.x, pipe.bottomY, pipeWidth, pipe.bottomHeight);
-
   pipes.push(pipe);
-}
-
-function updateGameSpeed() {
-  const speedIncreases = Math.floor(score / 50);
-  gameSpeed = 1 + speedIncreases * 0.1;
-  if (gameSpeed > 2) gameSpeed = 2;
 }
 
 function createBadge() {
   const badgeType = badgeTypes[Math.floor(Math.random()*badgeTypes.length)];
   badges.push({
     x: canvas.displayWidth + Math.random()*200,
-    y: Math.random()*(canvas.displayHeight-100)+50,
+    y: Math.random()*(canvas.displayHeight-200)+100,
     width: 40, height: 40, collected: false,
     bob: Math.random()*Math.PI*2, type: badgeType
   });
 }
 
-/* ========= Particles ========= */
 function createParticle(x,y) {
   particles.push({
     x, y,
@@ -668,11 +570,8 @@ function createParticle(x,y) {
   });
 }
 
-/* ========= Drawing ========= */
+// Drawing Functions
 function drawBackground() {
-  // soft animated water lines (lightweight)
-  ctx.fillStyle = '#4682b4';
-  ctx.fillRect(0,0,canvas.displayWidth,canvas.displayHeight);
   const grad = ctx.createLinearGradient(0,0,0,canvas.displayHeight);
   grad.addColorStop(0,'#87ceeb');
   grad.addColorStop(0.3,'#4682b4');
@@ -702,50 +601,57 @@ function drawPlayer() {
   const rotation = Math.max(-0.5, Math.min(0.5, player.velocity*0.03));
   ctx.rotate(rotation);
 
-  // Draw clean bubble first (no stray seam)
   ctx.beginPath();
   ctx.lineWidth = 2;
   ctx.strokeStyle = 'rgba(255,255,255,0.6)';
   ctx.arc(0,0, player.width/2 + 3, 0, Math.PI*2);
-  ctx.closePath();
   ctx.stroke();
 
-  // Pig nose emoji centered
   ctx.font = `${player.width}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('🐽', 0, 1); // tiny 1px y tweak to visually center
+  ctx.fillText('🐽', 0, 1);
 
   ctx.restore();
 }
 
-function drawTunnel(x,y,width,height,isTop, cracks) {
-  // solid color body for perf
-  ctx.fillStyle = isTop ? '#3e6b1f' : '#7d2323';
-  ctx.fillRect(x,y,width,height);
-
-  // dark edges
-  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(x,y,width,height);
-
-  // draw cracks (precomputed) – thin strokes
-  ctx.strokeStyle = isTop ? '#1a3009' : '#3d0e0e';
-  ctx.lineWidth = 1;
-  ctx.lineCap = 'round';
-  cracks.forEach(ck=>{
-    ctx.beginPath();
-    ctx.moveTo(ck.start.x, ck.start.y);
-    ck.points.forEach(p=>ctx.lineTo(p.x, p.y));
-    ctx.stroke();
-  });
-}
-
 function drawPipes() {
-  for (const pipe of pipes) {
-    drawTunnel(pipe.x, 0, pipe.width, pipe.topHeight, true, pipe.topCracks);
-    drawTunnel(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight, false, pipe.bottomCracks);
-  }
+  pipes.forEach(pipe => {
+    // Draw top pipe
+    ctx.fillStyle = '#3e6b1f';
+    ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(pipe.x, 0, pipe.width, pipe.topHeight);
+
+    // Draw top pipe cracks
+    ctx.strokeStyle = '#1a3009';
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'round';
+    pipe.topCracks.forEach(crack => {
+      ctx.beginPath();
+      ctx.moveTo(crack.start.x, crack.start.y);
+      crack.points.forEach(point => ctx.lineTo(point.x, point.y));
+      ctx.stroke();
+    });
+
+    // Draw bottom pipe
+    ctx.fillStyle = '#7d2323';
+    ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight);
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight);
+
+    // Draw bottom pipe cracks
+    ctx.strokeStyle = '#3d0e0e';
+    ctx.lineWidth = 1;
+    pipe.bottomCracks.forEach(crack => {
+      ctx.beginPath();
+      ctx.moveTo(crack.start.x, crack.start.y);
+      crack.points.forEach(point => ctx.lineTo(point.x, point.y));
+      ctx.stroke();
+    });
+  });
 }
 
 function drawBadges() {
@@ -753,6 +659,7 @@ function drawBadges() {
     if (b.collected) return;
     b.bob += 0.1;
     const bobOffset = Math.sin(b.bob)*5;
+    
     ctx.save();
     ctx.translate(b.x + b.width/2, b.y + b.height/2 + bobOffset);
 
@@ -761,8 +668,6 @@ function drawBadges() {
     ctx.textBaseline = 'middle';
     ctx.fillText(b.type, 0, 0);
 
-    ctx.shadowColor = '#ffd700';
-    ctx.shadowBlur = 12;
     ctx.strokeStyle = '#ffd700';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -783,14 +688,12 @@ function drawParticles() {
   });
 }
 
-/* ========= Update ========= */
+// Game Update
 function updateGame() {
-  if (gameState!=='playing') return;
+  if (gameState !== 'playing') return;
   frame++;
 
-  updateGameSpeed();
-
-  // controls
+  // Player movement - Reverted to original gradual mechanics
   if (isSpacePressed || isMousePressed) {
     player.velocity += player.upForce;
     if (player.velocity < player.maxUpVelocity) player.velocity = player.maxUpVelocity;
@@ -800,32 +703,40 @@ function updateGame() {
   }
   player.y += player.velocity;
 
-  // pipes spawn / move (side-scrolling stays; only crack animation removed)
-  if (frame % 140 === 0) createPipe();
+  // Spawn objects with original timing
+  const spawnRate = Math.max(80, 100 - Math.floor(score / 10) * 3);
+  if (frame % spawnRate === 0) createPipe();
+  if (frame % Math.max(60, 90 - Math.floor(score / 20) * 3) === 0) createBadge();
 
-  // badges
-  if (frame % 90 === 0) createBadge();
-
-  // move world left
-  pipes.forEach(pipe=>{
+  // Move objects and update crack positions
+  pipes.forEach(pipe => {
     pipe.x -= 3 * gameSpeed;
+    
+    // Update crack positions to move with pipes
+    pipe.topCracks.forEach(crack => {
+      crack.start.x -= 3 * gameSpeed;
+      crack.points.forEach(point => point.x -= 3 * gameSpeed);
+    });
+    pipe.bottomCracks.forEach(crack => {
+      crack.start.x -= 3 * gameSpeed;
+      crack.points.forEach(point => point.x -= 3 * gameSpeed);
+    });
   });
-  badges.forEach(b=>{
-    b.x -= 2 * gameSpeed;
-  });
-  particles.forEach(p=>{
+  
+  badges.forEach(b => b.x -= 2 * gameSpeed);
+  particles.forEach(p => {
     p.x += p.vx * gameSpeed;
     p.y += p.vy;
     p.life--;
   });
 
-  // cleanup
-  pipes = pipes.filter(p=>p.x + p.width > 0);
-  badges = badges.filter(b=>!b.collected && b.x + b.width > 0);
-  particles = particles.filter(p=>p.life>0);
+  // Cleanup
+  pipes = pipes.filter(p => p.x + p.width > 0);
+  badges = badges.filter(b => !b.collected && b.x + b.width > 0);
+  particles = particles.filter(p => p.life > 0);
 
-  // scoring and collisions
-  pipes.forEach(pipe=>{
+  // Scoring
+  pipes.forEach(pipe => {
     if (!pipe.passed && pipe.x + pipe.width < player.x) {
       pipe.passed = true;
       score++;
@@ -833,32 +744,31 @@ function updateGame() {
     }
   });
 
-  // badge collection
-  badges.forEach(b=>{
+  // Badge collection with improved collision detection
+  badges.forEach(b => {
     if (!b.collected &&
-      player.x < b.x + b.width &&
-      player.x + player.width > b.x &&
-      player.y < b.y + b.height &&
-      player.y + player.height > b.y) {
+      player.x + player.width/4 < b.x + b.width &&
+      player.x + player.width*3/4 > b.x &&
+      player.y + player.height/4 < b.y + b.height &&
+      player.y + player.height*3/4 > b.y) {
         b.collected = true;
         badgeCount++;
         score += 5;
         for (let i=0;i<5;i++) createParticle(b.x, b.y);
-        playBubblePop(); // louder pop
+        playBubblePop();
       }
   });
 
-  // walls
-  if (player.y + player.height > canvas.displayHeight || player.y < 0) {
+  // Collisions with improved detection
+  if (player.y + player.height > canvas.displayHeight - 20 || player.y < 20) {
     playThunk();
     endGame();
     return;
   }
 
-  // pipes
   for (const pipe of pipes) {
-    const hitX = (player.x < pipe.x + pipe.width) && (player.x + player.width > pipe.x);
-    const hitY = (player.y < pipe.topHeight) || (player.y + player.height > pipe.bottomY);
+    const hitX = (player.x + 5 < pipe.x + pipe.width) && (player.x + player.width - 5 > pipe.x);
+    const hitY = (player.y + 5 < pipe.topHeight) || (player.y + player.height - 5 > pipe.bottomY);
     if (hitX && hitY) {
       playThunk();
       endGame();
@@ -866,12 +776,16 @@ function updateGame() {
     }
   }
 
-  // UI
+  // Update UI
   document.getElementById('score').textContent = score;
   document.getElementById('badges').textContent = badgeCount;
+
+  // Speed up gradually
+  gameSpeed = 1 + Math.floor(score / 50) * 0.1;
+  if (gameSpeed > 2) gameSpeed = 2;
 }
 
-/* ========= Loop ========= */
+// Game Loop
 function draw() {
   ctx.clearRect(0,0,canvas.displayWidth,canvas.displayHeight);
   drawBackground();
@@ -883,18 +797,26 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-/* ========= Game Flow ========= */
+// Game Flow
 function startGame() {
-  ensureAudio();
-  startMusic();
-
+  console.log('Starting game...');
+  initAudio();
+  
+  // Stop menu music and start game music
+  stopMusic();
+  setTimeout(() => startMusic(), 100);
+  
   gameState = 'playing';
-  score = 0; badgeCount = 0; frame = 0; gameSpeed = 1;
+  score = 0;
+  badgeCount = 0;
+  frame = 0;
+  gameSpeed = 1;
   player.y = Math.min(300, canvas.displayHeight/2);
   player.velocity = 0;
-  pipes = []; badges = []; particles = [];
+  pipes = [];
+  badges = [];
+  particles = [];
 
-  // Clear any new record highlights
   document.getElementById('finalScore').classList.remove('new-record');
   document.getElementById('finalBadges').classList.remove('new-record');
 
@@ -902,11 +824,12 @@ function startGame() {
   document.getElementById('gameOver').style.display = 'none';
   document.getElementById('gameUI').style.display = 'block';
 }
+
 function endGame() {
+  console.log('Ending game...');
   gameState = 'gameOver';
   stopMusic();
   
-  // Check for new records
   let newScoreRecord = false;
   let newBadgeRecord = false;
   
@@ -920,17 +843,14 @@ function endGame() {
     newBadgeRecord = true;
   }
   
-  // Save high scores
   if (newScoreRecord || newBadgeRecord) {
     saveHighScore();
   }
   
-  // Update displays
   document.getElementById('finalScore').textContent = score;
   document.getElementById('finalBadges').textContent = badgeCount;
   updateHighScoreDisplay();
   
-  // Add visual feedback for new records
   setTimeout(() => {
     if (newScoreRecord) {
       document.getElementById('finalScore').classList.add('new-record');
@@ -943,68 +863,100 @@ function endGame() {
   document.getElementById('gameOver').style.display = 'block';
   document.getElementById('gameUI').style.display = 'none';
 }
-function restartGame() { startGame(); }
 
-/* ========= Controls ========= */
-document.addEventListener('keydown', e=>{
-  if (e.code==='Space') {
+function goHome() {
+  console.log('Going home...');
+  gameState = 'start';
+  stopMusic();
+  
+  // Start menu music
+  setTimeout(() => {
+    initAudio();
+    startMusic();
+  }, 100);
+  
+  document.getElementById('gameOver').style.display = 'none';
+  document.getElementById('gameUI').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'block';
+}
+
+// Controls
+let spaceKeyDown = false;
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
     e.preventDefault();
-    if (gameState==='playing') isSpacePressed = true;
+    if (gameState === 'playing' && !spaceKeyDown) {
+      isSpacePressed = true;
+      spaceKeyDown = true;
+    }
   }
-  // Allow quick-start with Enter on start screen
-  if (e.code==='Enter' && gameState==='start') {
+  if (e.code === 'Enter' && gameState === 'start') {
     startGame();
   }
 });
-document.addEventListener('keyup', e=>{
-  if (e.code==='Space') {
+
+document.addEventListener('keyup', e => {
+  if (e.code === 'Space') {
     e.preventDefault();
     isSpacePressed = false;
+    spaceKeyDown = false;
   }
 });
 
-// Mouse/Touch controls with better mobile support
-canvas.addEventListener('mousedown', (e)=>{
+// Mouse/Touch controls
+canvas.addEventListener('mousedown', e => {
   e.preventDefault();
-  if (gameState==='playing') isMousePressed = true;
+  if (gameState === 'playing') {
+    isMousePressed = true;
+  }
 });
-canvas.addEventListener('mouseup', (e)=>{ 
+
+canvas.addEventListener('mouseup', e => { 
   e.preventDefault();
   isMousePressed = false; 
 });
-canvas.addEventListener('mouseleave', ()=>{ isMousePressed = false; });
 
-// Touch events with proper mobile handling
-canvas.addEventListener('touchstart', (e)=>{
+canvas.addEventListener('touchstart', e => {
   e.preventDefault();
-  if (gameState==='playing') isMousePressed = true;
+  if (gameState === 'playing') {
+    isMousePressed = true;
+  }
 }, { passive: false });
 
-canvas.addEventListener('touchend', (e)=>{
+canvas.addEventListener('touchend', e => {
   e.preventDefault();
   isMousePressed = false;
 }, { passive: false });
 
-canvas.addEventListener('touchcancel', (e)=>{
-  e.preventDefault();
-  isMousePressed = false;
-}, { passive: false });
-
-// Prevent context menu on long press
-canvas.addEventListener('contextmenu', (e)=>{
-  e.preventDefault();
+// Button Events - Using simple onclick
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('startBtn').onclick = function() {
+    console.log('Start button clicked!');
+    startGame();
+  };
+  
+  document.getElementById('restartBtn').onclick = function() {
+    console.log('Restart button clicked!');
+    startGame();
+  };
+  
+  document.getElementById('homeBtn').onclick = function() {
+    console.log('Home button clicked!');
+    goHome();
+  };
 });
 
-/* ========= Buttons ========= */
-document.getElementById('startBtn').addEventListener('click', startGame);
-document.getElementById('restartBtn').addEventListener('click', restartGame);
-
-/* ========= Kickoff ========= */
-// Load high scores when the game starts
+// Initialize
 loadHighScore();
-draw(); // render loop runs the whole time; UI controls visibility
+
+// Start menu music after page loads
+setTimeout(() => {
+  initAudio();
+  startMusic();
+}, 200);
+
+draw();
 </script>
 </body>
 </html>
-
-
