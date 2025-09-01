@@ -98,7 +98,7 @@
   }
   
   .game-title {
-    font-size:48px; font-weight:900; margin:16px 0 6px;
+    font-size:42px; font-weight:900; margin:16px 0 6px;
     color:#ff00ff; letter-spacing:3px; text-transform:uppercase;
     text-shadow:0 0 10px #ff00ff,0 0 20px #ff00ff,0 0 40px #ff00ff,4px 4px 0px #00ffff,8px 8px 0px #ffff00;
     background: linear-gradient(45deg,#ff00ff,#00ffff,#ffff00,#ff00ff);
@@ -118,56 +118,6 @@
     display: inline-block;
   }
   
-  .high-score-display {
-    margin: 10px 0 15px 0;
-    padding: 8px 12px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 8px;
-    border: 1px solid rgba(0,255,255,0.3);
-  }
-  
-  .high-score-item {
-    font-size: 14px;
-    color: #00ffff;
-    text-shadow: 0 0 5px #00ffff;
-    margin: 2px 0;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-  }
-  
-  .score-comparison {
-    margin: 15px 0;
-  }
-  
-  .current-score {
-    margin-bottom: 10px;
-  }
-  
-  .high-score-section {
-    padding: 8px 12px;
-    background: rgba(255,215,0,0.1);
-    border-radius: 6px;
-    border: 1px solid rgba(255,215,0,0.3);
-    margin-top: 8px;
-  }
-  
-  .high-score-label {
-    margin: 4px 0 !important;
-    font-size: 12px;
-    opacity: 0.9;
-  }
-  
-  .new-record {
-    animation: recordPulse 0.8s ease-in-out infinite alternate;
-    color: #ffd700 !important;
-    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700 !important;
-  }
-  
-  @keyframes recordPulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.05); }
-  }
-  
   /* Responsive title sizing */
   @media (max-width: 768px) {
     .game-title {
@@ -177,62 +127,7 @@
     }
   }
   
-  /* Mobile adjustments for high score display */
-  @media (max-width: 768px) {
-    .high-score-display {
-      margin: 12px auto 16px auto;
-      padding: 10px 14px;
-      max-width: 180px;
-    }
-    
-    .high-score-header {
-      font-size: 11px;
-      margin-bottom: 6px;
-    }
-    
-    .high-score-item {
-      font-size: 14px;
-      gap: 3px;
-    }
-    
-    .high-score-stats {
-      gap: 6px;
-    }
-    
-    .high-score-section {
-      padding: 6px 10px;
-    }
-    
-    .high-score-label {
-      font-size: 11px;
-    }
-  }
-  
   @media (max-width: 480px) {
-    .high-score-display {
-      margin: 10px auto 14px auto;
-      padding: 8px 12px;
-      max-width: 160px;
-    }
-    
-    .high-score-header {
-      font-size: 10px;
-      margin-bottom: 5px;
-    }
-    
-    .high-score-item {
-      font-size: 13px;
-      gap: 2px;
-    }
-    
-    .high-score-stats {
-      gap: 5px;
-    }
-    
-    .high-score-divider {
-      font-size: 14px;
-    }
-  }
     .game-title {
       font-size:22px;
       letter-spacing:0.5px;
@@ -310,10 +205,6 @@
 
     <div id="startScreen">
       <h1 class="game-title"><span class="bubble-left">🫧</span> FLAPPY PORK <span class="bubble-right">🫧</span></h1>
-      <div class="high-score-display">
-        <div class="high-score-item">🏆 High Score: <span id="highScore">0</span></div>
-        <div class="high-score-item">🎖️ Best Badges: <span id="highBadges">0</span></div>
-      </div>
       <p class="game-subtitle">Navigate the pond</p>
       <p class="game-subtitle">Collect the badges, earn the points</p>
       <button class="game-button" id="startBtn">Start Game</button>
@@ -322,16 +213,8 @@
 
     <div id="gameOver">
       <h1 class="game-title">Game Over</h1>
-      <div class="score-comparison">
-        <div class="current-score">
-          <p class="game-subtitle">Final Score: <span id="finalScore">0</span></p>
-          <p class="game-subtitle">Badges Collected: <span id="finalBadges">0</span></p>
-        </div>
-        <div class="high-score-section">
-          <p class="game-subtitle high-score-label">Personal Best:</p>
-          <p class="game-subtitle">🏆 <span id="finalHighScore">0</span> | 🎖️ <span id="finalHighBadges">0</span></p>
-        </div>
-      </div>
+      <p class="game-subtitle">Final Score: <span id="finalScore">0</span></p>
+      <p class="game-subtitle">Badges Collected: <span id="finalBadges">0</span></p>
       <button class="game-button" id="restartBtn">Flap Anyways</button>
     </div>
   </div>
@@ -374,43 +257,6 @@ let frame = 0;
 let isSpacePressed = false;
 let isMousePressed = false;
 let gameSpeed = 1;
-let highScore = 0;
-let highBadges = 0;
-
-// High Score Management (In-memory for Claude artifacts)
-// Note: Replace with localStorage in your own environment
-let gameData = {
-  highScore: 0,
-  highBadges: 0
-};
-
-function loadHighScore() {
-  // In your own environment, replace this with:
-  // const saved = localStorage.getItem('flappyPorkHighScore');
-  // if (saved) {
-  //   gameData = JSON.parse(saved);
-  // }
-  
-  highScore = gameData.highScore;
-  highBadges = gameData.highBadges;
-  updateHighScoreDisplay();
-}
-
-function saveHighScore() {
-  // In your own environment, replace this with:
-  // localStorage.setItem('flappyPorkHighScore', JSON.stringify(gameData));
-  
-  // For now, just update the in-memory data
-  gameData.highScore = highScore;
-  gameData.highBadges = highBadges;
-}
-
-function updateHighScoreDisplay() {
-  document.getElementById('highScore').textContent = highScore;
-  document.getElementById('highBadges').textContent = highBadges;
-  document.getElementById('finalHighScore').textContent = highScore;
-  document.getElementById('finalHighBadges').textContent = highBadges;
-}
 
 const player = {
   x: 100,
@@ -894,10 +740,6 @@ function startGame() {
   player.velocity = 0;
   pipes = []; badges = []; particles = [];
 
-  // Clear any new record highlights
-  document.getElementById('finalScore').classList.remove('new-record');
-  document.getElementById('finalBadges').classList.remove('new-record');
-
   document.getElementById('startScreen').style.display = 'none';
   document.getElementById('gameOver').style.display = 'none';
   document.getElementById('gameUI').style.display = 'block';
@@ -905,41 +747,8 @@ function startGame() {
 function endGame() {
   gameState = 'gameOver';
   stopMusic();
-  
-  // Check for new records
-  let newScoreRecord = false;
-  let newBadgeRecord = false;
-  
-  if (score > highScore) {
-    highScore = score;
-    newScoreRecord = true;
-  }
-  
-  if (badgeCount > highBadges) {
-    highBadges = badgeCount;
-    newBadgeRecord = true;
-  }
-  
-  // Save high scores
-  if (newScoreRecord || newBadgeRecord) {
-    saveHighScore();
-  }
-  
-  // Update displays
   document.getElementById('finalScore').textContent = score;
   document.getElementById('finalBadges').textContent = badgeCount;
-  updateHighScoreDisplay();
-  
-  // Add visual feedback for new records
-  setTimeout(() => {
-    if (newScoreRecord) {
-      document.getElementById('finalScore').classList.add('new-record');
-    }
-    if (newBadgeRecord) {
-      document.getElementById('finalBadges').classList.add('new-record');
-    }
-  }, 100);
-  
   document.getElementById('gameOver').style.display = 'block';
   document.getElementById('gameUI').style.display = 'none';
 }
@@ -1000,10 +809,7 @@ document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('restartBtn').addEventListener('click', restartGame);
 
 /* ========= Kickoff ========= */
-// Load high scores when the game starts
-loadHighScore();
 draw(); // render loop runs the whole time; UI controls visibility
 </script>
 </body>
 </html>
-
