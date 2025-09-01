@@ -1,790 +1,641 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLAPPY PORK</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #4a90e2, #7b68ee, #87ceeb);
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-        }
-        
-        #gameContainer {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background: linear-gradient(to bottom, #87ceeb 0%, #4682b4 50%, #1e90ff 100%);
-        }
-        
-        canvas {
-            display: block;
-            background: linear-gradient(to bottom, #87ceeb 0%, #4682b4 30%, #4169e1 70%, #0047ab 100%);
-        }
-        
-        #gameUI {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-            z-index: 10;
-            display: none;
-        }
-        
-        #gameOver {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            display: none;
-            z-index: 20;
-        }
-        
-        #startScreen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            z-index: 20;
-        }
-        
-        .game-button {
-            background: #4a90e2;
-            color: #00ffff;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 10px;
-            transition: background 0.3s;
-            text-shadow: 
-                0 0 5px #00ffff,
-                0 0 10px #00ffff,
-                2px 2px 0px #ff00ff;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            animation: subtitleGlow 1.5s ease-in-out infinite alternate;
-        }
-        
-        .game-button:hover {
-            background: #357abd;
-        }
-        
-        .water-ripple {
-            position: absolute;
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation: ripple 2s linear infinite;
-        }
-        
-        @keyframes ripple {
-            0% {
-                width: 10px;
-                height: 10px;
-                opacity: 1;
-            }
-            100% {
-                width: 100px;
-                height: 100px;
-                opacity: 0;
-            }
-        }
-        
-        .pond-particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-        
-        .bubble-right {
-            display: inline-block;
-            transform: scaleX(-1);
-        }
-        
-        .game-title {
-            font-size: 48px;
-            font-weight: 900;
-            font-family: 'Arial Black', Arial, sans-serif;
-            margin: 30px 0;
-            color: #ff00ff;
-            text-shadow: 
-                0 0 10px #ff00ff,
-                0 0 20px #ff00ff,
-                0 0 40px #ff00ff,
-                4px 4px 0px #00ffff,
-                8px 8px 0px #ffff00;
-            animation: neonPulse 2s ease-in-out infinite alternate, textFloat 3s ease-in-out infinite;
-            letter-spacing: 3px;
-            transform: perspective(500px) rotateX(15deg);
-            text-transform: uppercase;
-            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 8px 16px rgba(255, 0, 255, 0.4));
-            white-space: nowrap;
-        }
-        
-        .game-subtitle {
-            font-size: 16px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: #00ffff;
-            text-shadow: 
-                0 0 5px #00ffff,
-                0 0 10px #00ffff,
-                2px 2px 0px #ff00ff;
-            margin: 15px 0;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            animation: subtitleGlow 1.5s ease-in-out infinite alternate;
-            white-space: nowrap;
-        }
-        
-        @keyframes neonPulse {
-            0% { 
-                text-shadow: 
-                    0 0 5px #ff00ff,
-                    0 0 10px #ff00ff,
-                    0 0 20px #ff00ff,
-                    4px 4px 0px #00ffff,
-                    8px 8px 0px #ffff00;
-            }
-            100% { 
-                text-shadow: 
-                    0 0 20px #ff00ff,
-                    0 0 40px #ff00ff,
-                    0 0 60px #ff00ff,
-                    4px 4px 0px #00ffff,
-                    8px 8px 0px #ffff00;
-            }
-        }
-        
-        @keyframes textFloat {
-            0%, 100% { transform: perspective(500px) rotateX(15deg) translateY(0px); }
-            50% { transform: perspective(500px) rotateX(15deg) translateY(-10px); }
-        }
-        
-        @keyframes subtitleGlow {
-            0% { 
-                text-shadow: 
-                    0 0 5px #00ffff,
-                    0 0 10px #00ffff,
-                    2px 2px 0px #ff00ff;
-            }
-            100% { 
-                text-shadow: 
-                    0 0 10px #00ffff,
-                    0 0 20px #00ffff,
-                    2px 2px 0px #ff00ff;
-            }
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FLAPPY PORK</title>
+<style>
+  :root {
+    --ui-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+  }
+  html,body {
+    margin:0; padding:0; height:100%;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#4a90e2,#7b68ee,#87ceeb);
+    overflow:hidden;
+  }
+  #gameContainer {
+    position:relative; width:100vw; height:100vh; overflow:hidden;
+    background: linear-gradient(to bottom,#87ceeb 0%,#4682b4 50%,#1e90ff 100%);
+  }
+  canvas { display:block; width:100%; height:100%;
+    background: linear-gradient(to bottom,#87ceeb 0%,#4682b4 30%,#4169e1 70%,#0047ab 100%);
+  }
+  #gameUI {
+    position:absolute; top:20px; left:20px; color:#fff;
+    font-size:20px; font-weight:bold; text-shadow:var(--ui-shadow);
+    z-index:10; display:none; user-select:none;
+  }
+  #startScreen, #gameOver {
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    background: rgba(0,0,0,0.8); color:#fff; padding:24px 28px; border-radius:14px;
+    text-align:center; z-index:20; user-select:none;
+  }
+  #gameOver { display:none; } /* hide game over at load */
+  .game-button {
+    background:#4a90e2; color:#00ffff; border:none; padding:12px 22px;
+    font-size:16px; font-weight:bold; font-family:'Courier New', monospace;
+    border-radius:8px; cursor:pointer; margin:10px; transition:background .2s ease;
+    text-shadow:0 0 5px #00ffff,0 0 10px #00ffff,2px 2px 0px #ff00ff;
+    letter-spacing:1px; text-transform:uppercase;
+  }
+  .game-button:hover { background:#357abd; }
+  .game-title {
+    font-size:42px; font-weight:900; margin:16px 0 6px;
+    color:#ff00ff; letter-spacing:3px; text-transform:uppercase;
+    text-shadow:0 0 10px #ff00ff,0 0 20px #ff00ff,0 0 40px #ff00ff,4px 4px 0px #00ffff,8px 8px 0px #ffff00;
+    background: linear-gradient(45deg,#ff00ff,#00ffff,#ffff00,#ff00ff);
+    background-size:400% 400%; -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; white-space:nowrap;
+  }
+  .game-subtitle {
+    font-size:14px; font-weight:bold; font-family:'Courier New', monospace;
+    color:#00ffff; text-shadow:0 0 5px #00ffff,0 0 10px #00ffff,2px 2px 0px #ff00ff;
+    margin:10px 0; letter-spacing:1px; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  /* Tiny, unobtrusive audio hint on mobile (taps to start unlock audio) */
+  #hint { font-size:12px; opacity:.8; margin-top:6px; }
+</style>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="100%" height="100%"></canvas>
-        
-        <div id="gameUI">
-            <div>Score: <span id="score">0</span></div>
-            <div>Badges: <span id="badges">0</span></div>
-        </div>
-        
-        <div id="startScreen">
-            <h1 class="game-title"><span class="bubble-left">🫧</span> FLAPPY PORK <span class="bubble-right">🫧</span></h1>
-            <p class="game-subtitle">NAVIGATE THE POND</p>
-            <p class="game-subtitle">COLLECT THE BADGES, EARN THE POINTS</p>
-            
-            <button class="game-button" onclick="startGame()">Start Game</button>
-        </div>
-        
-        <div id="gameOver">
-            <h1 class="game-title">GAME OVER</h1>
-            <p class="game-subtitle">FINAL SCORE: <span id="finalScore">0</span></p>
-            <p class="game-subtitle">BADGES COLLECTED: <span id="finalBadges">0</span></p>
-            
-            <button class="game-button" onclick="restartGame()">Flap Anyways</button>
-        </div>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="gameUI">
+      <div>Score: <span id="score">0</span></div>
+      <div>Badges: <span id="badges">0</span></div>
     </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Set canvas to full screen
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        
-        // Initial resize and add event listener
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        
-        let gameState = 'start'; // 'start', 'playing', 'gameOver'
-        let score = 0;
-        let badgeCount = 0;
-        let frame = 0;
-        let isSpacePressed = false;
-        let isMousePressed = false;
-        let gameSpeed = 1; // Speed multiplier for the game
-        
-        // Game objects
-        let player = {
-            x: 100,
-            y: 300,
-            width: 40,
-            height: 40,
-            velocity: 0,
-            gravity: 0.4, // Reduced gravity for smoother control
-            upForce: -0.6, // Continuous upward force when holding
-            maxUpVelocity: -8,
-            maxDownVelocity: 8,
-            image: null
-        };
-        
-        let pipes = [];
-        let badges = [];
-        let particles = [];
-        
-        // Badge emoji types
-        const badgeTypes = ['⛏️', '🤝', '🐷', '💎', '👨‍🍳', '🐰', '😭', '🥽', '🥼', '✊', '✨'];
-        
-        // Load player image from uploaded file
-        async function loadPlayerImage() {
-            try {
-                // Try common image file names
-                const possibleNames = ['image.png', 'image.jpg', 'image.jpeg', 'character.png', 'frog.png'];
-                let imageData = null;
-                let fileName = '';
-                
-                for (const name of possibleNames) {
-                    try {
-                        imageData = await window.fs.readFile(name);
-                        fileName = name;
-                        break;
-                    } catch (e) {
-                        continue;
-                    }
-                }
-                
-                if (!imageData) {
-                    // Try the original name
-                    imageData = await window.fs.readFile('pepe.png');
-                    fileName = 'pepe.png';
-                }
-                
-                const blob = new Blob([imageData], { type: 'image/png' });
-                const imageUrl = URL.createObjectURL(blob);
-                
-                player.image = new Image();
-                player.image.onload = function() {
-                    console.log('Player image loaded successfully:', fileName);
-                };
-                player.image.src = imageUrl;
-            } catch (error) {
-                console.log('Could not load uploaded image, using default character');
-                // Create a simple default character
-                player.image = null;
-            }
-        }
-        
-        // Initialize game
-        loadPlayerImage();
-        
-        // Pipe creation
-        function createPipe() {
-            const gap = 200; // Increased from 150 to 200 for easier gameplay
-            const pipeWidth = 50;
-            const minHeight = 50;
-            const maxHeight = canvas.height - gap - minHeight;
-            const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
-            
-            pipes.push({
-                x: canvas.width,
-                topHeight: topHeight,
-                bottomY: topHeight + gap,
-                bottomHeight: canvas.height - (topHeight + gap),
-                width: pipeWidth,
-                passed: false
-            });
-        }
-        
-        function updateGameSpeed() {
-            // Calculate speed based on score (every 50 points increases speed)
-            const speedIncreases = Math.floor(score / 50);
-            // Gradually increase speed, maxing out at 2x original speed
-            gameSpeed = 1 + (speedIncreases * 0.1); // 0.1 increase per 50 points
-            if (gameSpeed > 2) {
-                gameSpeed = 2; // Cap at 2x speed
-            }
-        }
-        
-        function createBadge() {
-            const badgeType = badgeTypes[Math.floor(Math.random() * badgeTypes.length)];
-            badges.push({
-                x: canvas.width + Math.random() * 200,
-                y: Math.random() * (canvas.height - 100) + 50,
-                width: 40,
-                height: 40,
-                collected: false,
-                bob: Math.random() * Math.PI * 2,
-                type: badgeType
-            });
-        }
-        
-        // Particle system for pond effects
-        function createParticle(x, y) {
-            particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                life: 30,
-                maxLife: 30
-            });
-        }
-        
-        function drawBackground() {
-            // Animated water background
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#87ceeb');
-            gradient.addColorStop(0.3, '#4682b4');
-            gradient.addColorStop(0.7, '#4169e1');
-            gradient.addColorStop(1, '#0047ab');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Water ripples effect
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 3; i++) {
-                ctx.beginPath();
-                const wave = Math.sin((frame * 0.02) + (i * Math.PI / 3)) * 20;
-                ctx.moveTo(0, canvas.height * 0.8 + wave);
-                for (let x = 0; x <= canvas.width; x += 10) {
-                    const y = canvas.height * 0.8 + Math.sin((x * 0.01) + (frame * 0.02) + (i * Math.PI / 3)) * 20;
-                    ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-            }
-        }
-        
-        function drawPlayer() {
-            ctx.save();
-            ctx.translate(player.x + player.width/2, player.y + player.height/2);
-            
-            // Slight rotation based on velocity for dynamic movement
-            const rotation = Math.max(-0.5, Math.min(0.5, player.velocity * 0.03));
-            ctx.rotate(rotation);
-            
-            if (player.image && player.image.complete) {
-                // Draw the uploaded character image
-                ctx.drawImage(player.image, -player.width/2, -player.height/2, player.width, player.height);
-            } else {
-                // Default pig nose emoji character with bubble effect
-                ctx.font = `${player.width}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                // Draw pig nose emoji
-                ctx.fillText('🐽', 0, 0);
-                
-                // Add bubble effect around the pig nose (same style as before)
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(0, 0, player.width/2 + 3, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-        
-        function drawPipes() {
-            pipes.forEach(pipe => {
-                // Top tunnel
-                drawTunnel(pipe.x, 0, pipe.width, pipe.topHeight, true);
-                
-                // Bottom tunnel
-                drawTunnel(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight, false);
-            });
-        }
-        
-        function drawTunnel(x, y, width, height, isTop) {
-            ctx.save();
-            
-            // Tunnel body gradient (green for top, red for bottom)
-            const gradient = ctx.createLinearGradient(x, y, x, y + height);
-            if (isTop) {
-                // Green tunnel
-                gradient.addColorStop(0, '#2d5016');
-                gradient.addColorStop(0.3, '#3e6b1f');
-                gradient.addColorStop(0.7, '#4a7c23');
-                gradient.addColorStop(1, '#5a9c2a');
-            } else {
-                // Red tunnel
-                gradient.addColorStop(0, '#5c1a1a');
-                gradient.addColorStop(0.3, '#7d2323');
-                gradient.addColorStop(0.7, '#8f2a2a');
-                gradient.addColorStop(1, '#a33333');
-            }
-            
-            ctx.fillStyle = gradient;
-            
-            // Draw tunnel shape
-            ctx.fillRect(x, y, width, height);
-            
-            // Add inner tunnel darkness
-            const innerGradient = ctx.createLinearGradient(x, y, x + width, y);
-            innerGradient.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
-            innerGradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.1)');
-            innerGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-            ctx.fillStyle = innerGradient;
-            ctx.fillRect(x, y, width, height);
-            
-            // Add cracks
-            ctx.strokeStyle = isTop ? '#1a3009' : '#3d0e0e';
-            ctx.lineWidth = 2;
-            
-            // Vertical cracks
-            for (let i = 0; i < 3; i++) {
-                const crackX = x + 10 + (i * (width - 20) / 2);
-                ctx.beginPath();
-                ctx.moveTo(crackX, y);
-                
-                // Jagged crack line
-                let currentY = y;
-                const endY = y + height;
-                while (currentY < endY) {
-                    const nextY = Math.min(currentY + 15 + Math.random() * 20, endY);
-                    const offsetX = crackX + (Math.random() - 0.5) * 8;
-                    ctx.lineTo(offsetX, nextY);
-                    currentY = nextY;
-                }
-                ctx.stroke();
-            }
-            
-            // Horizontal cracks
-            for (let i = 0; i < 4; i++) {
-                const crackY = y + 20 + (i * (height - 40) / 3);
-                if (crackY < y + height - 20) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, crackY);
-                    
-                    let currentX = x;
-                    const endX = x + width;
-                    while (currentX < endX) {
-                        const nextX = Math.min(currentX + 8 + Math.random() * 12, endX);
-                        const offsetY = crackY + (Math.random() - 0.5) * 6;
-                        ctx.lineTo(nextX, offsetY);
-                        currentX = nextX;
-                    }
-                    ctx.stroke();
-                }
-            }
-            
-            // Add darker edge shadows
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(x, y, width, height);
-            
-            // Add some debris/rock chunks
-            ctx.fillStyle = isTop ? 'rgba(26, 48, 9, 0.8)' : 'rgba(61, 14, 14, 0.8)';
-            for (let i = 0; i < 8; i++) {
-                const debrisX = x + 3 + Math.random() * (width - 6);
-                const debrisY = y + 3 + Math.random() * (height - 6);
-                const size = 2 + Math.random() * 4;
-                
-                ctx.beginPath();
-                ctx.arc(debrisX, debrisY, size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            ctx.restore();
-        }
-        
-        function drawBadges() {
-            badges.forEach(badge => {
-                if (!badge.collected) {
-                    badge.bob += 0.1;
-                    const bobOffset = Math.sin(badge.bob) * 5;
-                    
-                    // Draw floating badge
-                    ctx.save();
-                    ctx.translate(badge.x + badge.width/2, badge.y + badge.height/2 + bobOffset);
-                    
-                    // Draw the emoji badge
-                    ctx.font = `${badge.width}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(badge.type, 0, 0);
-                    
-                    // Add glow effect for pond badges
-                    ctx.shadowColor = '#ffd700';
-                    ctx.shadowBlur = 15;
-                    ctx.strokeStyle = '#ffd700';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, badge.width/2 + 5, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    ctx.restore();
-                }
-            });
-        }
-        
-        function drawParticles() {
-            particles.forEach(particle => {
-                const alpha = particle.life / particle.maxLife;
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.beginPath();
-                ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
-                ctx.fill();
-            });
-        }
-        
-        function updateGame() {
-            if (gameState !== 'playing') return;
-            
-            frame++;
-            
-            // Update game speed based on badge collected
-            updateGameSpeed();
-            
-            // Update player movement based on input
-            if (isSpacePressed || isMousePressed) {
-                // Apply upward force when holding
-                player.velocity += player.upForce;
-                if (player.velocity < player.maxUpVelocity) {
-                    player.velocity = player.maxUpVelocity;
-                }
-            } else {
-                // Apply gravity when not holding
-                player.velocity += player.gravity;
-                if (player.velocity > player.maxDownVelocity) {
-                    player.velocity = player.maxDownVelocity;
-                }
-            }
-            
-            player.y += player.velocity;
-            
-            // Create pipes - increased spacing
-            if (frame % 140 === 0) { // Increased from 120 to 140 for more spacing
-                createPipe();
-            }
-            
-            // Create badge
-            if (frame % 90 === 0) {
-                createBadge();
-            }
-            
-            // Update pipes with dynamic speed
-            pipes.forEach(pipe => {
-                pipe.x -= 3 * gameSpeed; // Apply speed multiplier
-                
-                // Score when passing pipe
-                if (!pipe.passed && pipe.x + pipe.width < player.x) {
-                    pipe.passed = true;
-                    score++;
-                    createParticle(player.x, player.y);
-                }
-            });
-            
-            // Update badges with dynamic speed
-            badges.forEach(badge => {
-                badge.x -= 2 * gameSpeed; // Apply speed multiplier
-                
-                // Check collection
-                if (!badge.collected && 
-                    player.x < badge.x + badge.width &&
-                    player.x + player.width > badge.x &&
-                    player.y < badge.y + badge.height &&
-                    player.y + player.height > badge.y) {
-                    
-                    badge.collected = true;
-                    badgeCount++;
-                    score += 5; // Bonus points for badges
-                    
-                    // Create celebration particles
-                    for (let i = 0; i < 5; i++) {
-                        createParticle(badge.x, badge.y);
-                    }
-                }
-            });
-            
-            // Update particles with dynamic speed
-            particles.forEach(particle => {
-                particle.x += particle.vx * gameSpeed; // Apply speed multiplier
-                particle.y += particle.vy;
-                particle.life--;
-            });
-            
-            // Clean up arrays
-            pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
-            badges = badges.filter(badge => badge.x + badge.width > 0);
-            particles = particles.filter(particle => particle.life > 0);
-            
-            // Collision detection
-            checkCollisions();
-            
-            // Update UI
-            document.getElementById('score').textContent = score;
-            document.getElementById('badges').textContent = badgeCount;
-        }
-        
-        function checkCollisions() {
-            // Ground and ceiling
-            if (player.y + player.height > canvas.height || player.y < 0) {
-                endGame();
-                return;
-            }
-            
-            // Pipes
-            pipes.forEach(pipe => {
-                if (player.x < pipe.x + pipe.width &&
-                    player.x + player.width > pipe.x) {
-                    
-                    if (player.y < pipe.topHeight ||
-                        player.y + player.height > pipe.bottomY) {
-                        endGame();
-                        return;
-                    }
-                }
-            });
-        }
-        
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            drawBackground();
-            drawPipes();
-            drawBadges();
-            drawParticles();
-            drawPlayer();
-            
-            updateGame();
-            requestAnimationFrame(draw);
-        }
-        
-        function playerJump() {
-            // This function is no longer used with the new hold-to-rise control scheme
-            // Keeping it for compatibility but it does nothing
-        }
-        
-        function startGame() {
-            gameState = 'playing';
-            score = 0;
-            badgeCount = 0;
-            frame = 0;
-            gameSpeed = 1; // Reset game speed
-            player.y = 300;
-            player.velocity = 0;
-            pipes = [];
-            badges = [];
-            particles = [];
-            
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('gameOver').style.display = 'none';
-            document.getElementById('gameUI').style.display = 'block';
-        }
-        
-        function endGame() {
-            gameState = 'gameOver';
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('finalBadges').textContent = badgeCount;
-            document.getElementById('gameOver').style.display = 'block';
-            document.getElementById('gameUI').style.display = 'none';
-        }
-        
-        function restartGame() {
-            startGame();
-        }
-        
-        // Event listeners
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                if (gameState === 'playing') {
-                    isSpacePressed = true;
-                }
-            }
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                isSpacePressed = false;
-            }
-        });
-        
-        canvas.addEventListener('mousedown', (e) => {
-            if (gameState === 'playing') {
-                isMousePressed = true;
-            }
-        });
-        
-        canvas.addEventListener('mouseup', (e) => {
-            isMousePressed = false;
-        });
-        
-        canvas.addEventListener('mouseleave', (e) => {
-            isMousePressed = false;
-        });
-        
-        // Touch events for mobile
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (gameState === 'playing') {
-                isMousePressed = true;
-            }
-        });
-        
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            isMousePressed = false;
-        });
-        
-        // Start the game loop
-        draw();
-    </script>
+    <div id="startScreen">
+      <h1 class="game-title"><span>🫧</span> FLAPPY PORK <span class="bubble-right">🫧</span></h1>
+      <p class="game-subtitle">Navigate the pond</p>
+      <p class="game-subtitle">Collect the badges, earn the points</p>
+      <button class="game-button" id="startBtn">Start Game</button>
+      <div id="hint">Tip: tap/hold screen or press/hold Space to rise.</div>
+    </div>
+
+    <div id="gameOver">
+      <h1 class="game-title">Game Over</h1>
+      <p class="game-subtitle">Final Score: <span id="finalScore">0</span></p>
+      <p class="game-subtitle">Badges Collected: <span id="finalBadges">0</span></p>
+      <button class="game-button" id="restartBtn">Flap Anyways</button>
+    </div>
+  </div>
+
+<script>
+/* ========= Canvas Setup ========= */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d', { alpha: false }); // better perf
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+/* ========= Game State ========= */
+let gameState = 'start'; // 'start' | 'playing' | 'gameOver'
+let score = 0;
+let badgeCount = 0;
+let frame = 0;
+let isSpacePressed = false;
+let isMousePressed = false;
+let gameSpeed = 1;
+
+const player = {
+  x: 100,
+  y: 300,
+  width: 40,
+  height: 40,
+  velocity: 0,
+  gravity: 0.40,
+  upForce: -0.60,
+  maxUpVelocity: -8,
+  maxDownVelocity: 8
+};
+let pipes = [];
+let badges = [];
+let particles = [];
+
+const badgeTypes = ['⛏️','🤝','🐷','💎','👨‍🍳','🐰','😭','🥽','🥼','✊','✨'];
+
+/* ========= Audio (Procedural, No Assets Needed) ========= */
+let AudioCtx = window.AudioContext || window.webkitAudioContext;
+let actx = null;
+let masterGain = null;
+let musicGain = null;
+let sfxGain = null;
+let musicRunning = false;
+let musicSchedulerId = null;
+
+// Create or resume audio on first user gesture
+function ensureAudio() {
+  if (!actx) {
+    actx = new AudioCtx();
+    masterGain = actx.createGain();
+    masterGain.gain.value = 0.9; // overall headroom
+    masterGain.connect(actx.destination);
+
+    musicGain = actx.createGain();
+    musicGain.gain.value = 0.08; // subtle background volume
+    musicGain.connect(masterGain);
+
+    sfxGain = actx.createGain();
+    sfxGain.gain.value = 0.9; // SFX bus (individual sounds control their own)
+    sfxGain.connect(masterGain);
+  } else if (actx.state === 'suspended') {
+    actx.resume();
+  }
+}
+
+/* ---- Chiptune Music Loop (Public-domain-style) ----
+   Simple 8-bit vibe: square waves on two voices + a clicky noise hi-hat.
+   Pattern loops forever while playing; stopped on Game Over. */
+function startMusic() {
+  if (!actx) ensureAudio();
+  if (musicRunning) return;
+  musicRunning = true;
+
+  const tempo = 120; // BPM
+  const beatDur = 60/tempo; // quarter note
+  const patternBeats = 16;   // 4 bars of 4/4
+  const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]; // C major
+
+  // Two simple repeating melodies
+  const leadPattern = [0,2,4,7, 7,4,2,0,  0,2,4,9, 7,4,2,0]; // scale indices
+  const bassPattern = [0,0,0,0, 5,5,5,5,  3,3,3,3, 4,4,4,4];
+
+  // Schedules one loop chunk
+  function scheduleLoop(startTime) {
+    for (let i=0; i<patternBeats; i++) {
+      const t = startTime + i * beatDur;
+
+      // Lead (square)
+      const oscL = actx.createOscillator();
+      const gainL = actx.createGain();
+      oscL.type = 'square';
+      const fL = scale[leadPattern[i] % scale.length];
+      oscL.frequency.value = fL;
+      // short envelope
+      gainL.gain.setValueAtTime(0.0, t);
+      gainL.gain.linearRampToValueAtTime(0.18, t + 0.01);
+      gainL.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.9);
+      oscL.connect(gainL).connect(musicGain);
+      oscL.start(t);
+      oscL.stop(t + beatDur);
+
+      // Bass (square one octave down)
+      const oscB = actx.createOscillator();
+      const gainB = actx.createGain();
+      oscB.type = 'square';
+      const fB = scale[bassPattern[i] % scale.length] / 2;
+      oscB.frequency.value = fB;
+      gainB.gain.setValueAtTime(0.0, t);
+      gainB.gain.linearRampToValueAtTime(0.12, t + 0.01);
+      gainB.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.95);
+      oscB.connect(gainB).connect(musicGain);
+      oscB.start(t);
+      oscB.stop(t + beatDur);
+
+      // Simple hi-hat (filtered noise burst) on eighths
+      for (let k=0; k<2; k++) {
+        const ht = t + k*(beatDur/2);
+        const bufferSize = 256;
+        const noiseBuf = actx.createBuffer(1, bufferSize, actx.sampleRate);
+        const data = noiseBuf.getChannelData(0);
+        for (let n=0; n<bufferSize; n++) data[n] = (Math.random()*2-1) * 0.8;
+        const src = actx.createBufferSource();
+        src.buffer = noiseBuf;
+
+        const hp = actx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = 4000;
+
+        const g = actx.createGain();
+        g.gain.setValueAtTime(0.0, ht);
+        g.gain.linearRampToValueAtTime(0.08, ht + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0005, ht + 0.1);
+
+        src.connect(hp).connect(g).connect(musicGain);
+        src.start(ht);
+        src.stop(ht + 0.12);
+      }
+    }
+  }
+
+  // Kick off and keep looping
+  const startAt = actx.currentTime + 0.05;
+  scheduleLoop(startAt);
+  // reschedule every pattern length slightly ahead of time
+  const loopDur = patternBeats * beatDur;
+  musicSchedulerId = setInterval(() => {
+    const t = actx.currentTime + 0.05;
+    scheduleLoop(t);
+  }, loopDur * 1000 - 50);
+}
+
+function stopMusic() {
+  if (musicSchedulerId) clearInterval(musicSchedulerId);
+  musicSchedulerId = null;
+  musicRunning = false;
+}
+
+/* ---- SFX ---- */
+function playBubblePop() {
+  if (!actx) ensureAudio();
+  const t = actx.currentTime;
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = 'square';
+  o.frequency.setValueAtTime(900, t);
+  o.frequency.exponentialRampToValueAtTime(1600, t + 0.06);
+  g.gain.setValueAtTime(0.001, t);
+  g.gain.exponentialRampToValueAtTime(0.55, t + 0.01); // louder pop
+  g.gain.exponentialRampToValueAtTime(0.0008, t + 0.14);
+  o.connect(g).connect(sfxGain);
+  o.start(t);
+  o.stop(t + 0.16);
+}
+
+function playThunk() {
+  if (!actx) ensureAudio();
+  const t = actx.currentTime;
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(180, t);
+  o.frequency.exponentialRampToValueAtTime(90, t + 0.12);
+  g.gain.setValueAtTime(0.001, t);
+  g.gain.exponentialRampToValueAtTime(0.7, t + 0.02); // louder thunk
+  g.gain.exponentialRampToValueAtTime(0.0008, t + 0.22);
+  o.connect(g).connect(sfxGain);
+  o.start(t);
+  o.stop(t + 0.25);
+}
+
+/* ========= Pipes & Badges ========= */
+function createPipe() {
+  const gap = 200;
+  const pipeWidth = 50;
+  const minHeight = 50;
+  const maxHeight = canvas.height - gap - minHeight;
+  const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+
+  // Precompute crack segments for perf
+  function makeCracks(x, y, w, h) {
+    const cracks = [];
+    const vCount = 3, hCount = 3;
+    // vertical cracks
+    for (let i=0; i<vCount; i++) {
+      const baseX = x + 10 + (i * (w - 20) / (vCount-1));
+      let curY = y;
+      const segs = [];
+      while (curY < y + h) {
+        const step = 12 + Math.random()*18;
+        const nextY = Math.min(curY + step, y + h);
+        const offX = baseX + (Math.random()-0.5)*8;
+        segs.push({x:offX, y:nextY});
+        curY = nextY;
+      }
+      cracks.push({type:'v', start:{x:baseX, y:y}, points:segs});
+    }
+    // horizontal cracks
+    for (let i=0; i<hCount; i++) {
+      const baseY = y + 15 + (i * (h - 30) / (hCount));
+      const segs = [];
+      let curX = x, endX = x + w;
+      while (curX < endX) {
+        const step = 10 + Math.random()*14;
+        const nx = Math.min(curX + step, endX);
+        const oy = baseY + (Math.random()-0.5)*6;
+        segs.push({x:nx, y:oy});
+        curX = nx;
+      }
+      cracks.push({type:'h', start:{x:x, y:baseY}, points:segs});
+    }
+    return cracks;
+  }
+
+  const pipe = {
+    x: canvas.width,
+    width: pipeWidth,
+    topHeight,
+    bottomY: topHeight + gap,
+    bottomHeight: canvas.height - (topHeight + gap),
+    passed: false,
+  };
+
+  // store cracks for both top and bottom
+  pipe.topCracks = makeCracks(pipe.x, 0, pipeWidth, topHeight);
+  pipe.bottomCracks = makeCracks(pipe.x, pipe.bottomY, pipeWidth, pipe.bottomHeight);
+
+  pipes.push(pipe);
+}
+
+function updateGameSpeed() {
+  const speedIncreases = Math.floor(score / 50);
+  gameSpeed = 1 + speedIncreases * 0.1;
+  if (gameSpeed > 2) gameSpeed = 2;
+}
+
+function createBadge() {
+  const badgeType = badgeTypes[Math.floor(Math.random()*badgeTypes.length)];
+  badges.push({
+    x: canvas.width + Math.random()*200,
+    y: Math.random()*(canvas.height-100)+50,
+    width: 40, height: 40, collected: false,
+    bob: Math.random()*Math.PI*2, type: badgeType
+  });
+}
+
+/* ========= Particles ========= */
+function createParticle(x,y) {
+  particles.push({
+    x, y,
+    vx:(Math.random()-0.5)*4,
+    vy:(Math.random()-0.5)*4,
+    life: 28, maxLife: 28
+  });
+}
+
+/* ========= Drawing ========= */
+function drawBackground() {
+  // soft animated water lines (lightweight)
+  ctx.fillStyle = '#4682b4';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0,'#87ceeb');
+  grad.addColorStop(0.3,'#4682b4');
+  grad.addColorStop(0.7,'#4169e1');
+  grad.addColorStop(1,'#0047ab');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 2;
+  for (let i=0;i<2;i++){
+    ctx.beginPath();
+    const yBase = canvas.height*0.8 + Math.sin(frame*0.02 + i)*16;
+    ctx.moveTo(0, yBase);
+    for (let x=0;x<=canvas.width;x+=12){
+      const y = canvas.height*0.8 + Math.sin(x*0.01 + frame*0.02 + i)*16;
+      ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+}
+
+function drawPlayer() {
+  ctx.save();
+  ctx.translate(player.x + player.width/2, player.y + player.height/2);
+
+  const rotation = Math.max(-0.5, Math.min(0.5, player.velocity*0.03));
+  ctx.rotate(rotation);
+
+  // Draw clean bubble first (no stray seam)
+  ctx.beginPath();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.arc(0,0, player.width/2 + 3, 0, Math.PI*2);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Pig nose emoji centered
+  ctx.font = `${player.width}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🐽', 0, 1); // tiny 1px y tweak to visually center
+
+  ctx.restore();
+}
+
+function drawTunnel(x,y,width,height,isTop, cracks) {
+  // solid color body for perf
+  ctx.fillStyle = isTop ? '#3e6b1f' : '#7d2323';
+  ctx.fillRect(x,y,width,height);
+
+  // dark edges
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(x,y,width,height);
+
+  // draw cracks (precomputed) – thin strokes
+  ctx.strokeStyle = isTop ? '#1a3009' : '#3d0e0e';
+  ctx.lineWidth = 1;
+  ctx.lineCap = 'round';
+  cracks.forEach(ck=>{
+    ctx.beginPath();
+    ctx.moveTo(ck.start.x, ck.start.y);
+    ck.points.forEach(p=>ctx.lineTo(p.x, p.y));
+    ctx.stroke();
+  });
+}
+function drawPipes() {
+  for (const pipe of pipes) {
+    drawTunnel(pipe.x, 0, pipe.width, pipe.topHeight, true, pipe.topCracks);
+    drawTunnel(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight, false, pipe.bottomCracks);
+  }
+}
+
+function drawBadges() {
+  badges.forEach(b=>{
+    if (b.collected) return;
+    b.bob += 0.1;
+    const bobOffset = Math.sin(b.bob)*5;
+    ctx.save();
+    ctx.translate(b.x + b.width/2, b.y + b.height/2 + bobOffset);
+
+    ctx.font = `${b.width}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(b.type, 0, 0);
+
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 12;
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0,0,b.width/2 + 4,0,Math.PI*2);
+    ctx.stroke();
+
+    ctx.restore();
+  });
+}
+
+function drawParticles() {
+  particles.forEach(p=>{
+    const a = p.life/p.maxLife;
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,2,0,Math.PI*2);
+    ctx.fill();
+  });
+}
+
+/* ========= Update ========= */
+function updateGame() {
+  if (gameState!=='playing') return;
+  frame++;
+
+  updateGameSpeed();
+
+  // controls
+  if (isSpacePressed || isMousePressed) {
+    player.velocity += player.upForce;
+    if (player.velocity < player.maxUpVelocity) player.velocity = player.maxUpVelocity;
+  } else {
+    player.velocity += player.gravity;
+    if (player.velocity > player.maxDownVelocity) player.velocity = player.maxDownVelocity;
+  }
+  player.y += player.velocity;
+
+  // pipes spawn / move (side-scrolling stays; only crack animation removed)
+  if (frame % 140 === 0) createPipe();
+
+  // badges
+  if (frame % 90 === 0) createBadge();
+
+  // move world left
+  pipes.forEach(pipe=>{
+    pipe.x -= 3 * gameSpeed;
+  });
+  badges.forEach(b=>{
+    b.x -= 2 * gameSpeed;
+  });
+  particles.forEach(p=>{
+    p.x += p.vx * gameSpeed;
+    p.y += p.vy;
+    p.life--;
+  });
+
+  // cleanup
+  pipes = pipes.filter(p=>p.x + p.width > 0);
+  badges = badges.filter(b=>!b.collected && b.x + b.width > 0);
+  particles = particles.filter(p=>p.life>0);
+
+  // scoring and collisions
+  pipes.forEach(pipe=>{
+    if (!pipe.passed && pipe.x + pipe.width < player.x) {
+      pipe.passed = true;
+      score++;
+      createParticle(player.x, player.y);
+    }
+  });
+
+  // badge collection
+  badges.forEach(b=>{
+    if (!b.collected &&
+      player.x < b.x + b.width &&
+      player.x + player.width > b.x &&
+      player.y < b.y + b.height &&
+      player.y + player.height > b.y) {
+        b.collected = true;
+        badgeCount++;
+        score += 5;
+        for (let i=0;i<5;i++) createParticle(b.x, b.y);
+        playBubblePop(); // louder pop
+      }
+  });
+
+  // walls
+  if (player.y + player.height > canvas.height || player.y < 0) {
+    playThunk();
+    endGame();
+    return;
+  }
+
+  // pipes
+  for (const pipe of pipes) {
+    const hitX = (player.x < pipe.x + pipe.width) && (player.x + player.width > pipe.x);
+    const hitY = (player.y < pipe.topHeight) || (player.y + player.height > pipe.bottomY);
+    if (hitX && hitY) {
+      playThunk();
+      endGame();
+      return;
+    }
+  }
+
+  // UI
+  document.getElementById('score').textContent = score;
+  document.getElementById('badges').textContent = badgeCount;
+}
+
+/* ========= Loop ========= */
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBackground();
+  drawPipes();
+  drawBadges();
+  drawParticles();
+  drawPlayer();
+  updateGame();
+  requestAnimationFrame(draw);
+}
+
+/* ========= Game Flow ========= */
+function startGame() {
+  ensureAudio();
+  startMusic();
+
+  gameState = 'playing';
+  score = 0; badgeCount = 0; frame = 0; gameSpeed = 1;
+  player.y = Math.min(300, canvas.height/2);
+  player.velocity = 0;
+  pipes = []; badges = []; particles = [];
+
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameOver').style.display = 'none';
+  document.getElementById('gameUI').style.display = 'block';
+}
+function endGame() {
+  gameState = 'gameOver';
+  stopMusic();
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalBadges').textContent = badgeCount;
+  document.getElementById('gameOver').style.display = 'block';
+  document.getElementById('gameUI').style.display = 'none';
+}
+function restartGame() { startGame(); }
+
+/* ========= Controls ========= */
+document.addEventListener('keydown', e=>{
+  if (e.code==='Space') {
+    e.preventDefault();
+    if (gameState==='playing') isSpacePressed = true;
+  }
+  // Allow quick-start with Enter on start screen
+  if (e.code==='Enter' && gameState==='start') {
+    startGame();
+  }
+});
+document.addEventListener('keyup', e=>{
+  if (e.code==='Space') {
+    e.preventDefault();
+    isSpacePressed = false;
+  }
+});
+canvas.addEventListener('mousedown', ()=>{
+  if (gameState==='playing') isMousePressed = true;
+});
+canvas.addEventListener('mouseup', ()=>{ isMousePressed = false; });
+canvas.addEventListener('mouseleave', ()=>{ isMousePressed = false; });
+// Touch
+canvas.addEventListener('touchstart', (e)=>{
+  e.preventDefault();
+  if (gameState==='playing') isMousePressed = true;
+});
+canvas.addEventListener('touchend', (e)=>{
+  e.preventDefault();
+  isMousePressed = false;
+});
+
+/* ========= Buttons ========= */
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', restartGame);
+
+/* ========= Kickoff ========= */
+draw(); // render loop runs the whole time; UI controls visibility
+</script>
 </body>
 </html>
