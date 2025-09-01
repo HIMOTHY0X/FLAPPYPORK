@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLAPPY PORK</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4a90e2, #7b68ee, #87ceeb);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87ceeb 0%, #4682b4 50%, #1e90ff 100%);
+        }
+        
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #87ceeb 0%, #4682b4 30%, #4169e1 70%, #0047ab 100%);
+        }
+        
+        #gameUI {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            z-index: 10;
+            display: none;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 20;
+        }
+        
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 20;
+        }
+        
+        .game-button {
+            background: #4a90e2;
+            color: #00ffff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+            text-shadow: 
+                0 0 5px #00ffff,
+                0 0 10px #00ffff,
+                2px 2px 0px #ff00ff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: subtitleGlow 1.5s ease-in-out infinite alternate;
+        }
+        
+        .game-button:hover {
+            background: #357abd;
+        }
+        
+        .water-ripple {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: ripple 2s linear infinite;
+        }
+        
+        @keyframes ripple {
+            0% {
+                width: 10px;
+                height: 10px;
+                opacity: 1;
+            }
+            100% {
+                width: 100px;
+                height: 100px;
+                opacity: 0;
+            }
+        }
+        
+        .pond-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .bubble-right {
+            display: inline-block;
+            transform: scaleX(-1);
+        }
+        
+        .game-title {
+            font-size: 48px;
+            font-weight: 900;
+            font-family: 'Arial Black', Arial, sans-serif;
+            margin: 30px 0;
+            color: #ff00ff;
+            text-shadow: 
+                0 0 10px #ff00ff,
+                0 0 20px #ff00ff,
+                0 0 40px #ff00ff,
+                4px 4px 0px #00ffff,
+                8px 8px 0px #ffff00;
+            animation: neonPulse 2s ease-in-out infinite alternate, textFloat 3s ease-in-out infinite;
+            letter-spacing: 3px;
+            transform: perspective(500px) rotateX(15deg);
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 8px 16px rgba(255, 0, 255, 0.4));
+            white-space: nowrap;
+        }
+        
+        .game-subtitle {
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #00ffff;
+            text-shadow: 
+                0 0 5px #00ffff,
+                0 0 10px #00ffff,
+                2px 2px 0px #ff00ff;
+            margin: 15px 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: subtitleGlow 1.5s ease-in-out infinite alternate;
+            white-space: nowrap;
+        }
+        
+        @keyframes neonPulse {
+            0% { 
+                text-shadow: 
+                    0 0 5px #ff00ff,
+                    0 0 10px #ff00ff,
+                    0 0 20px #ff00ff,
+                    4px 4px 0px #00ffff,
+                    8px 8px 0px #ffff00;
+            }
+            100% { 
+                text-shadow: 
+                    0 0 20px #ff00ff,
+                    0 0 40px #ff00ff,
+                    0 0 60px #ff00ff,
+                    4px 4px 0px #00ffff,
+                    8px 8px 0px #ffff00;
+            }
+        }
+        
+        @keyframes textFloat {
+            0%, 100% { transform: perspective(500px) rotateX(15deg) translateY(0px); }
+            50% { transform: perspective(500px) rotateX(15deg) translateY(-10px); }
+        }
+        
+        @keyframes subtitleGlow {
+            0% { 
+                text-shadow: 
+                    0 0 5px #00ffff,
+                    0 0 10px #00ffff,
+                    2px 2px 0px #ff00ff;
+            }
+            100% { 
+                text-shadow: 
+                    0 0 10px #00ffff,
+                    0 0 20px #00ffff,
+                    2px 2px 0px #ff00ff;
+            }
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="100%" height="100%"></canvas>
+        
+        <div id="gameUI">
+            <div>Score: <span id="score">0</span></div>
+            <div>Badges: <span id="badges">0</span></div>
+        </div>
+        
+        <div id="startScreen">
+            <h1 class="game-title"><span class="bubble-left">🫧</span> FLAPPY PORK <span class="bubble-right">🫧</span></h1>
+            <p class="game-subtitle">NAVIGATE THE POND</p>
+            <p class="game-subtitle">COLLECT THE BADGES, EARN THE POINTS</p>
+            
+            <button class="game-button" onclick="startGame()">Start Game</button>
+        </div>
+        
+        <div id="gameOver">
+            <h1 class="game-title">GAME OVER</h1>
+            <p class="game-subtitle">FINAL SCORE: <span id="finalScore">0</span></p>
+            <p class="game-subtitle">BADGES COLLECTED: <span id="finalBadges">0</span></p>
+            
+            <button class="game-button" onclick="restartGame()">Flap Anyways</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas to full screen
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        // Initial resize and add event listener
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        let gameState = 'start'; // 'start', 'playing', 'gameOver'
+        let score = 0;
+        let badgeCount = 0;
+        let frame = 0;
+        let isSpacePressed = false;
+        let isMousePressed = false;
+        let gameSpeed = 1; // Speed multiplier for the game
+        
+        // Game objects
+        let player = {
+            x: 100,
+            y: 300,
+            width: 40,
+            height: 40,
+            velocity: 0,
+            gravity: 0.4, // Reduced gravity for smoother control
+            upForce: -0.6, // Continuous upward force when holding
+            maxUpVelocity: -8,
+            maxDownVelocity: 8,
+            image: null
+        };
+        
+        let pipes = [];
+        let badges = [];
+        let particles = [];
+        
+        // Badge emoji types
+        const badgeTypes = ['⛏️', '🤝', '🐷', '💎', '👨‍🍳', '🐰', '😭', '🥽', '🥼', '✊', '✨'];
+        
+        // Load player image from uploaded file
+        async function loadPlayerImage() {
+            try {
+                // Try common image file names
+                const possibleNames = ['image.png', 'image.jpg', 'image.jpeg', 'character.png', 'frog.png'];
+                let imageData = null;
+                let fileName = '';
+                
+                for (const name of possibleNames) {
+                    try {
+                        imageData = await window.fs.readFile(name);
+                        fileName = name;
+                        break;
+                    } catch (e) {
+                        continue;
+                    }
+                }
+                
+                if (!imageData) {
+                    // Try the original name
+                    imageData = await window.fs.readFile('pepe.png');
+                    fileName = 'pepe.png';
+                }
+                
+                const blob = new Blob([imageData], { type: 'image/png' });
+                const imageUrl = URL.createObjectURL(blob);
+                
+                player.image = new Image();
+                player.image.onload = function() {
+                    console.log('Player image loaded successfully:', fileName);
+                };
+                player.image.src = imageUrl;
+            } catch (error) {
+                console.log('Could not load uploaded image, using default character');
+                // Create a simple default character
+                player.image = null;
+            }
+        }
+        
+        // Initialize game
+        loadPlayerImage();
+        
+        // Pipe creation
+        function createPipe() {
+            const gap = 200; // Increased from 150 to 200 for easier gameplay
+            const pipeWidth = 50;
+            const minHeight = 50;
+            const maxHeight = canvas.height - gap - minHeight;
+            const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+            
+            pipes.push({
+                x: canvas.width,
+                topHeight: topHeight,
+                bottomY: topHeight + gap,
+                bottomHeight: canvas.height - (topHeight + gap),
+                width: pipeWidth,
+                passed: false
+            });
+        }
+        
+        function updateGameSpeed() {
+            // Calculate speed based on score (every 50 points increases speed)
+            const speedIncreases = Math.floor(score / 50);
+            // Gradually increase speed, maxing out at 2x original speed
+            gameSpeed = 1 + (speedIncreases * 0.1); // 0.1 increase per 50 points
+            if (gameSpeed > 2) {
+                gameSpeed = 2; // Cap at 2x speed
+            }
+        }
+        
+        function createBadge() {
+            const badgeType = badgeTypes[Math.floor(Math.random() * badgeTypes.length)];
+            badges.push({
+                x: canvas.width + Math.random() * 200,
+                y: Math.random() * (canvas.height - 100) + 50,
+                width: 40,
+                height: 40,
+                collected: false,
+                bob: Math.random() * Math.PI * 2,
+                type: badgeType
+            });
+        }
+        
+        // Particle system for pond effects
+        function createParticle(x, y) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                life: 30,
+                maxLife: 30
+            });
+        }
+        
+        function drawBackground() {
+            // Animated water background
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87ceeb');
+            gradient.addColorStop(0.3, '#4682b4');
+            gradient.addColorStop(0.7, '#4169e1');
+            gradient.addColorStop(1, '#0047ab');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Water ripples effect
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                const wave = Math.sin((frame * 0.02) + (i * Math.PI / 3)) * 20;
+                ctx.moveTo(0, canvas.height * 0.8 + wave);
+                for (let x = 0; x <= canvas.width; x += 10) {
+                    const y = canvas.height * 0.8 + Math.sin((x * 0.01) + (frame * 0.02) + (i * Math.PI / 3)) * 20;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+        }
+        
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(player.x + player.width/2, player.y + player.height/2);
+            
+            // Slight rotation based on velocity for dynamic movement
+            const rotation = Math.max(-0.5, Math.min(0.5, player.velocity * 0.03));
+            ctx.rotate(rotation);
+            
+            if (player.image && player.image.complete) {
+                // Draw the uploaded character image
+                ctx.drawImage(player.image, -player.width/2, -player.height/2, player.width, player.height);
+            } else {
+                // Default pig nose emoji character with bubble effect
+                ctx.font = `${player.width}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Draw pig nose emoji
+                ctx.fillText('🐽', 0, 0);
+                
+                // Add bubble effect around the pig nose (same style as before)
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, player.width/2 + 3, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+        
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                // Top tunnel
+                drawTunnel(pipe.x, 0, pipe.width, pipe.topHeight, true);
+                
+                // Bottom tunnel
+                drawTunnel(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight, false);
+            });
+        }
+        
+        function drawTunnel(x, y, width, height, isTop) {
+            ctx.save();
+            
+            // Tunnel body gradient (green for top, red for bottom)
+            const gradient = ctx.createLinearGradient(x, y, x, y + height);
+            if (isTop) {
+                // Green tunnel
+                gradient.addColorStop(0, '#2d5016');
+                gradient.addColorStop(0.3, '#3e6b1f');
+                gradient.addColorStop(0.7, '#4a7c23');
+                gradient.addColorStop(1, '#5a9c2a');
+            } else {
+                // Red tunnel
+                gradient.addColorStop(0, '#5c1a1a');
+                gradient.addColorStop(0.3, '#7d2323');
+                gradient.addColorStop(0.7, '#8f2a2a');
+                gradient.addColorStop(1, '#a33333');
+            }
+            
+            ctx.fillStyle = gradient;
+            
+            // Draw tunnel shape
+            ctx.fillRect(x, y, width, height);
+            
+            // Add inner tunnel darkness
+            const innerGradient = ctx.createLinearGradient(x, y, x + width, y);
+            innerGradient.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
+            innerGradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.1)');
+            innerGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+            ctx.fillStyle = innerGradient;
+            ctx.fillRect(x, y, width, height);
+            
+            // Add cracks
+            ctx.strokeStyle = isTop ? '#1a3009' : '#3d0e0e';
+            ctx.lineWidth = 2;
+            
+            // Vertical cracks
+            for (let i = 0; i < 3; i++) {
+                const crackX = x + 10 + (i * (width - 20) / 2);
+                ctx.beginPath();
+                ctx.moveTo(crackX, y);
+                
+                // Jagged crack line
+                let currentY = y;
+                const endY = y + height;
+                while (currentY < endY) {
+                    const nextY = Math.min(currentY + 15 + Math.random() * 20, endY);
+                    const offsetX = crackX + (Math.random() - 0.5) * 8;
+                    ctx.lineTo(offsetX, nextY);
+                    currentY = nextY;
+                }
+                ctx.stroke();
+            }
+            
+            // Horizontal cracks
+            for (let i = 0; i < 4; i++) {
+                const crackY = y + 20 + (i * (height - 40) / 3);
+                if (crackY < y + height - 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, crackY);
+                    
+                    let currentX = x;
+                    const endX = x + width;
+                    while (currentX < endX) {
+                        const nextX = Math.min(currentX + 8 + Math.random() * 12, endX);
+                        const offsetY = crackY + (Math.random() - 0.5) * 6;
+                        ctx.lineTo(nextX, offsetY);
+                        currentX = nextX;
+                    }
+                    ctx.stroke();
+                }
+            }
+            
+            // Add darker edge shadows
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x, y, width, height);
+            
+            // Add some debris/rock chunks
+            ctx.fillStyle = isTop ? 'rgba(26, 48, 9, 0.8)' : 'rgba(61, 14, 14, 0.8)';
+            for (let i = 0; i < 8; i++) {
+                const debrisX = x + 3 + Math.random() * (width - 6);
+                const debrisY = y + 3 + Math.random() * (height - 6);
+                const size = 2 + Math.random() * 4;
+                
+                ctx.beginPath();
+                ctx.arc(debrisX, debrisY, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawBadges() {
+            badges.forEach(badge => {
+                if (!badge.collected) {
+                    badge.bob += 0.1;
+                    const bobOffset = Math.sin(badge.bob) * 5;
+                    
+                    // Draw floating badge
+                    ctx.save();
+                    ctx.translate(badge.x + badge.width/2, badge.y + badge.height/2 + bobOffset);
+                    
+                    // Draw the emoji badge
+                    ctx.font = `${badge.width}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(badge.type, 0, 0);
+                    
+                    // Add glow effect for pond badges
+                    ctx.shadowColor = '#ffd700';
+                    ctx.shadowBlur = 15;
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, badge.width/2 + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    ctx.restore();
+                }
+            });
+        }
+        
+        function drawParticles() {
+            particles.forEach(particle => {
+                const alpha = particle.life / particle.maxLife;
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        function updateGame() {
+            if (gameState !== 'playing') return;
+            
+            frame++;
+            
+            // Update game speed based on badge collected
+            updateGameSpeed();
+            
+            // Update player movement based on input
+            if (isSpacePressed || isMousePressed) {
+                // Apply upward force when holding
+                player.velocity += player.upForce;
+                if (player.velocity < player.maxUpVelocity) {
+                    player.velocity = player.maxUpVelocity;
+                }
+            } else {
+                // Apply gravity when not holding
+                player.velocity += player.gravity;
+                if (player.velocity > player.maxDownVelocity) {
+                    player.velocity = player.maxDownVelocity;
+                }
+            }
+            
+            player.y += player.velocity;
+            
+            // Create pipes - increased spacing
+            if (frame % 140 === 0) { // Increased from 120 to 140 for more spacing
+                createPipe();
+            }
+            
+            // Create badge
+            if (frame % 90 === 0) {
+                createBadge();
+            }
+            
+            // Update pipes with dynamic speed
+            pipes.forEach(pipe => {
+                pipe.x -= 3 * gameSpeed; // Apply speed multiplier
+                
+                // Score when passing pipe
+                if (!pipe.passed && pipe.x + pipe.width < player.x) {
+                    pipe.passed = true;
+                    score++;
+                    createParticle(player.x, player.y);
+                }
+            });
+            
+            // Update badges with dynamic speed
+            badges.forEach(badge => {
+                badge.x -= 2 * gameSpeed; // Apply speed multiplier
+                
+                // Check collection
+                if (!badge.collected && 
+                    player.x < badge.x + badge.width &&
+                    player.x + player.width > badge.x &&
+                    player.y < badge.y + badge.height &&
+                    player.y + player.height > badge.y) {
+                    
+                    badge.collected = true;
+                    badgeCount++;
+                    score += 5; // Bonus points for badges
+                    
+                    // Create celebration particles
+                    for (let i = 0; i < 5; i++) {
+                        createParticle(badge.x, badge.y);
+                    }
+                }
+            });
+            
+            // Update particles with dynamic speed
+            particles.forEach(particle => {
+                particle.x += particle.vx * gameSpeed; // Apply speed multiplier
+                particle.y += particle.vy;
+                particle.life--;
+            });
+            
+            // Clean up arrays
+            pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+            badges = badges.filter(badge => badge.x + badge.width > 0);
+            particles = particles.filter(particle => particle.life > 0);
+            
+            // Collision detection
+            checkCollisions();
+            
+            // Update UI
+            document.getElementById('score').textContent = score;
+            document.getElementById('badges').textContent = badgeCount;
+        }
+        
+        function checkCollisions() {
+            // Ground and ceiling
+            if (player.y + player.height > canvas.height || player.y < 0) {
+                endGame();
+                return;
+            }
+            
+            // Pipes
+            pipes.forEach(pipe => {
+                if (player.x < pipe.x + pipe.width &&
+                    player.x + player.width > pipe.x) {
+                    
+                    if (player.y < pipe.topHeight ||
+                        player.y + player.height > pipe.bottomY) {
+                        endGame();
+                        return;
+                    }
+                }
+            });
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawPipes();
+            drawBadges();
+            drawParticles();
+            drawPlayer();
+            
+            updateGame();
+            requestAnimationFrame(draw);
+        }
+        
+        function playerJump() {
+            // This function is no longer used with the new hold-to-rise control scheme
+            // Keeping it for compatibility but it does nothing
+        }
+        
+        function startGame() {
+            gameState = 'playing';
+            score = 0;
+            badgeCount = 0;
+            frame = 0;
+            gameSpeed = 1; // Reset game speed
+            player.y = 300;
+            player.velocity = 0;
+            pipes = [];
+            badges = [];
+            particles = [];
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameUI').style.display = 'block';
+        }
+        
+        function endGame() {
+            gameState = 'gameOver';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalBadges').textContent = badgeCount;
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('gameUI').style.display = 'none';
+        }
+        
+        function restartGame() {
+            startGame();
+        }
+        
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameState === 'playing') {
+                    isSpacePressed = true;
+                }
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                isSpacePressed = false;
+            }
+        });
+        
+        canvas.addEventListener('mousedown', (e) => {
+            if (gameState === 'playing') {
+                isMousePressed = true;
+            }
+        });
+        
+        canvas.addEventListener('mouseup', (e) => {
+            isMousePressed = false;
+        });
+        
+        canvas.addEventListener('mouseleave', (e) => {
+            isMousePressed = false;
+        });
+        
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState === 'playing') {
+                isMousePressed = true;
+            }
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isMousePressed = false;
+        });
+        
+        // Start the game loop
+        draw();
+    </script>
+</body>
+</html>
