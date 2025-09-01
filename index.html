@@ -332,6 +332,7 @@
           <p class="game-subtitle">🏆 <span id="finalHighScore">0</span> | 🎖️ <span id="finalHighBadges">0</span></p>
         </div>
       </div>
+      <button class="game-button" id="homeBtn">Back to Title</button>
       <button class="game-button" id="restartBtn">Flap Anyways</button>
     </div>
   </div>
@@ -544,10 +545,22 @@ function startMusic() {
   }, loopDur * 1000 - 50);
 }
 
+// ENHANCED STOP FUNCTION - OPTION 1 IMPLEMENTATION
 function stopMusic() {
-  if (musicSchedulerId) clearInterval(musicSchedulerId);
-  musicSchedulerId = null;
+  if (musicSchedulerId) {
+    clearInterval(musicSchedulerId);
+    musicSchedulerId = null;
+  }
   musicRunning = false;
+  
+  // Force stop all scheduled audio nodes by disconnecting the music gain
+  if (musicGain) {
+    musicGain.disconnect();
+    // Recreate the music gain node for next time
+    musicGain = actx.createGain();
+    musicGain.gain.value = 0.08;
+    musicGain.connect(masterGain);
+  }
 }
 
 /* ---- SFX ---- */
@@ -902,9 +915,10 @@ function startGame() {
   document.getElementById('gameOver').style.display = 'none';
   document.getElementById('gameUI').style.display = 'block';
 }
+
 function endGame() {
   gameState = 'gameOver';
-  stopMusic();
+  stopMusic(); // Enhanced stop function prevents overlap
   
   // Check for new records
   let newScoreRecord = false;
@@ -940,9 +954,38 @@ function endGame() {
     }
   }, 100);
   
+  // Prevent immediate restart button spam to avoid audio overlap
+  document.getElementById('restartBtn').disabled = true;
+  document.getElementById('homeBtn').disabled = true;
+  setTimeout(() => {
+    document.getElementById('restartBtn').disabled = false;
+    document.getElementById('homeBtn').disabled = false;
+  }, 300);
+  
   document.getElementById('gameOver').style.display = 'block';
   document.getElementById('gameUI').style.display = 'none';
 }
+
+function goHome() {
+  gameState = 'start';
+  stopMusic(); // Ensure music is stopped
+  
+  // Reset game state
+  score = 0; badgeCount = 0; frame = 0; gameSpeed = 1;
+  player.y = Math.min(300, canvas.displayHeight/2);
+  player.velocity = 0;
+  pipes = []; badges = []; particles = [];
+  
+  // Clear any new record highlights
+  document.getElementById('finalScore').classList.remove('new-record');
+  document.getElementById('finalBadges').classList.remove('new-record');
+  
+  // Show start screen
+  document.getElementById('startScreen').style.display = 'block';
+  document.getElementById('gameOver').style.display = 'none';
+  document.getElementById('gameUI').style.display = 'none';
+}
+
 function restartGame() { startGame(); }
 
 /* ========= Controls ========= */
@@ -998,6 +1041,7 @@ canvas.addEventListener('contextmenu', (e)=>{
 /* ========= Buttons ========= */
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('restartBtn').addEventListener('click', restartGame);
+document.getElementById('homeBtn').addEventListener('click', goHome);
 
 /* ========= Kickoff ========= */
 // Load high scores when the game starts
